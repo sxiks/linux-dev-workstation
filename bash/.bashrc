@@ -287,3 +287,5 @@ export PATH="$PATH:/usr/share/code/bin"
 
 # Abrir imágenes con visor predeterminado
 . "$HOME/.cargo/env"
+alias dotpush='cd ~/dotfiles && git add . && git commit -m "chore: update dotfiles configurations" && git push origin main && cd -'
+alias dotpull='cd ~/dotfiles && git pull origin main && cd -'
