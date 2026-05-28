@@ -1,0 +1,26 @@
+// Configuración global de Zellij
+default_layout "opencode-workspace"
+default_shell "bash"
+
+// Copiar al portapapeles del sistema en Wayland/X11
+copy_command "xclip -selection clipboard"
+
+// Opciones de UI
+ui {
+    pane_frames {
+        hide_session_name false
+        rounded_corners true
+    }
+}
+
+// Colores de pestañas
+tab_bar {
+    active_tab_color {
+        background "#89b4fa"
+        foreground "#1e1e2e"
+    }
+    inactive_tab_color {
+        background "#45475a"
+        foreground "#cdd6f4"
+    }
+}

@@ -1,0 +1,8 @@
+[manager]
+prepend_keymap = [
+    # Atajos para Git
+    { on = ["g", "s"], run = "shell git status --short", desc = "Ver estado de Git" },
+    { on = ["g", "l"], run = "shell git log --oneline -n 10", desc = "Ver log de Git" },
+    { on = ["g", "d"], run = "shell git diff", desc = "Ver diff de Git" },
+    { on = ["g", "a"], run = "shell git add %0", desc = "Añadir archivo seleccionado a Git" },
+]

@@ -1,0 +1,28 @@
+[opener]
+vscode = [
+  { run = '/usr/share/code/bin/code "$@"', block = false, spread = true, desc = "VSCode" }
+]
+marktext_opener = [
+  { run = 'flatpak run com.github.marktext.marktext "$@"', block = false, spread = true, desc = "MarkText" }
+]
+sistema = [
+  { run = 'xdg-open "$@"', block = false, spread = true, desc = "Programa predeterminado" }
+]
+
+[open]
+rules = [
+  { name = "*.md", use = [ "marktext_opener" ] },
+  { name = "*.txt", use = [ "marktext_opener" ] },
+  { name = "*.pdf", use = [ "sistema" ] },
+  { name = "*.docx", use = [ "sistema" ] },
+  { name = "*.xlsx", use = [ "sistema" ] },
+  { name = "*.pptx", use = [ "sistema" ] },
+  { name = "*.odt", use = [ "sistema" ] },
+  { name = "*.ods", use = [ "sistema" ] },
+  { name = "*.png", use = [ "sistema" ] },
+  { name = "*.jpg", use = [ "sistema" ] },
+  { name = "*.jpeg", use = [ "sistema" ] },
+  { name = "*.gif", use = [ "sistema" ] },
+  { name = "*.svg", use = [ "sistema" ] },
+  { name = "*", use = [ "vscode" ] }
+]

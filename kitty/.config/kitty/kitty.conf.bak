@@ -1,0 +1,28 @@
+font_family JetBrains Mono
+bold_font auto
+italic_font auto
+bold_italic_font auto
+font_size 12.0
+
+background_opacity 0.80
+dynamic_background_opacity yes
+
+tab_bar_style powerline
+tab_bar_edge bottom
+tab_bar_align left
+tab_bar_min_tabs 1
+tab_title_template " {index}: {title} "
+active_tab_foreground #ffffff
+active_tab_background #204a87
+inactive_tab_foreground #888888
+inactive_tab_background #1a1a1a
+
+mouse_map right click ungrabbed paste_from_clipboard
+
+scrollback_lines 10000
+copy_on_select clipboard
+mouse_hide_wait 2.0
+detect_urls yes
+confirm_os_window_close 0
+enable_audio_bell no
+visual_bell_duration 0.0
