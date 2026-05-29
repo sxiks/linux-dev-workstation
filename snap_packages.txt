@@ -1,1 +1,2 @@
 gnome-3-28-1804
+lazygit

@@ -30,6 +30,7 @@ aspell
 aspell-en
 at-spi2-common
 at-spi2-core
+atuin
 autoconf
 automake
 autotools-dev
@@ -63,6 +64,7 @@ bzip2
 bzip2-doc
 ca-certificates
 cabextract
+cava
 clamav
 clamav-base
 clamav-freshclam
@@ -187,6 +189,7 @@ firmware-mediatek
 firmware-misc-nonfree
 firmware-nvidia-graphics
 firmware-realtek
+fish
 flatpak
 folks-common
 fontconfig
@@ -2144,9 +2147,11 @@ speech-dispatcher-espeak-ng
 spotify-client
 sqv
 ssl-cert
+starship
 stow
 sudo
 switcheroo-control
+syncthing
 system-config-printer-common
 system-config-printer-udev
 systemd
@@ -2176,6 +2181,7 @@ tpm-udev
 traceroute
 tracker-extract
 tree
+tty-clock
 tzdata
 ucf
 udev
