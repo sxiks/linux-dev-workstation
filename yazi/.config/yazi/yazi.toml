@@ -26,3 +26,13 @@ rules = [
   { name = "*.svg", use = [ "sistema" ] },
   { name = "*", use = [ "vscode" ] }
 ]
+
+[manager]
+sort_by        = "alphabetical"
+sort_sensitive = true
+sort_reverse   = false
+sort_dir_first = true
+
+# Forzar tema sin colores
+[theme]
+theme = "default"

@@ -1,0 +1,14 @@
+[manager]
+cwd          = { fg = "#ffffff" }
+hovered      = { fg = "#000000", bg = "#cccccc" }
+preview_hovered = { bg = "#333333" }
+
+[status]
+primary   = { fg = "#000000", bg = "#cccccc" }
+secondary = { fg = "#ffffff", bg = "#333333" }
+tertiary  = { fg = "#000000", bg = "#777777" }
+
+[filetype]
+rules = [
+	{ name = "*", fg = "#cccccc" },
+]

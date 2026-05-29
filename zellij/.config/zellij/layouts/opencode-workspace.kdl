@@ -5,38 +5,46 @@ layout {
         }
         children
     }
-
     tab name="system" {
-        pane {
-            command "btop"
-        }
-    }
-
-    tab name="dev" {
-        pane split_direction="vertical" {
-            pane size="65%" {
-                command "yazi"
-                cwd "/home/sxiks/proyectos"
-            }
-            pane size="35%" {
-                pane {
-                    command "/home/sxiks/.config/zellij/git-panel.sh"
+        pane split_direction="horizontal" {
+            pane size="40%" split_direction="vertical" {
+                pane size="50%" command="bash" {
+                    args "-c" "fastfetch; read"
                 }
-                pane {
-                    command "bash"
-                    cwd "/home/sxiks/proyectos"
+                pane size="30%" command="cava"
+                pane size="20%" command="tty-clock" {
+                    args "-c" "-C" "7"
                 }
-            }
-        }
-    }
-
-    tab name="agent-code" {
-        pane split_direction="vertical" {
-            pane size="40%" {
-                command "yazi"
-                cwd "/home/sxiks/proyectos"
             }
             pane size="60%" {
+                command "btop"
+            }
+        }
+    }
+    tab name="dev" {
+        pane split_direction="vertical" {
+            pane size="30%" {
+                command "yazi"
+                cwd "/home/sxiks/proyectos"
+            }
+            pane size="70%" split_direction="horizontal" {
+                pane size="60%" {
+                    command "/home/sxiks/.config/zellij/git-panel.sh"
+                }
+                pane size="40%" {
+                    command "/home/sxiks/bin/gitui"
+                    cwd "/home/sxiks/proyectos_sena/frontend-fundamentals"
+                }
+            }
+        }
+    }
+    tab name="agent-code" {
+        pane split_direction="vertical" {
+            pane size="30%" {
+                command "yazi"
+                cwd "/home/sxiks/proyectos"
+            }
+            pane size="70%" {
                 command "opencode"
             }
         }

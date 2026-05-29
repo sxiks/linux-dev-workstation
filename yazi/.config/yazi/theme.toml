@@ -1,3 +1,54 @@
-[mode]
 [flavor]
-dark = "catppuccin-mocha"
+use = ""
+
+[manager]
+cwd             = { fg = "#4a9eff" }
+hovered         = { fg = "#ffffff", bg = "#1e3a5f", bold = true }
+preview_hovered = { underline = true }
+
+tab_active   = { fg = "#4a9eff", bg = "#111827", bold = true }
+tab_inactive = { fg = "#445566", bg = "#0a0a0a" }
+tab_width    = 1
+
+border_symbol = "│"
+border_style  = { fg = "#1e3a5f" }
+
+find_keyword  = { fg = "#4a9eff", italic = true }
+find_position = { fg = "#aaaaaa", italic = true }
+
+marker_selected = { fg = "#4a9eff", bg = "#4a9eff" }
+marker_copied   = { fg = "#44aa55", bg = "#44aa55" }
+marker_cut      = { fg = "#cc4444", bg = "#cc4444" }
+
+[status]
+separator_open  = ""
+separator_close = ""
+separator_style = { fg = "#0a0a0a", bg = "#0a0a0a" }
+
+mode_normal = { fg = "#000000", bg = "#4a9eff", bold = true }
+mode_select = { fg = "#000000", bg = "#6ab4ff", bold = true }
+mode_unset  = { fg = "#000000", bg = "#2a6acc", bold = true }
+
+progress_label  = { fg = "#ffffff", bold = true }
+progress_normal = { fg = "#4a9eff", bg = "#111827" }
+progress_error  = { fg = "#cc4444", bg = "#111827" }
+
+permissions_t = { fg = "#1e3a5f" }
+permissions_r = { fg = "#3a6a9f" }
+permissions_w = { fg = "#2a5a8f" }
+permissions_x = { fg = "#4a7abf" }
+permissions_s = { fg = "#1e3a5f" }
+
+[filetype]
+rules = [
+  { name = "*/",                   fg = "#4a9eff", bold = true },
+  { mime = "text/*",               fg = "#7aaabb" },
+  { mime = "image/*",              fg = "#5a8aaa" },
+  { mime = "video/*",              fg = "#4a7a99" },
+  { mime = "audio/*",              fg = "#4a7a99" },
+  { mime = "application/zip",      fg = "#4a6a88" },
+  { mime = "application/gzip",     fg = "#4a6a88" },
+  { mime = "application/x-tar",    fg = "#4a6a88" },
+  { mime = "application/zstd",     fg = "#4a6a88" },
+  { name = "*",                    fg = "#5a7a8a" },
+]
