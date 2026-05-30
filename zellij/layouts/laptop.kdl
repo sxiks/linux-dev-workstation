@@ -1,0 +1,56 @@
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:compact-bar"
+        }
+        children
+    }
+    
+    tab name="system" {
+        pane split_direction="vertical" {
+            // Columna Izquierda (35% del ancho total)
+            pane size="35%" split_direction="horizontal" {
+                // Ajustado al 65% de altura para que no se corte
+                pane size="65%" command="bash" {
+                    args "-c" "fastfetch; read"
+                }
+                // Cava toma el resto del espacio
+                pane command="cava"
+            }
+            // Columna Derecha (65% del ancho total)
+            pane size="65%" {
+                command "btop"
+            }
+        }
+    }
+    
+    tab name="dev" {
+        pane split_direction="vertical" {
+            pane size="30%" {
+                command "yazi"
+                cwd "/home/sxiks/proyectos"
+            }
+            pane size="70%" split_direction="horizontal" {
+                pane size="60%" {
+                    command "/home/sxiks/.config/zellij/git-panel.sh"
+                }
+                // Panel de gitui con respaldo automático si la ruta falla
+                pane size="40%" command="bash" {
+                    args "-c" "cd /home/sxiks/proyectos_sena/frontend-fundamentals || cd ~/dotfiles; gitui"
+                }
+            }
+        }
+    }
+    
+    tab name="agent-code" {
+        pane split_direction="vertical" {
+            pane size="30%" {
+                command "yazi"
+                cwd "/home/sxiks/proyectos"
+            }
+            pane size="70%" {
+                command "opencode"
+            }
+        }
+    }
+}
