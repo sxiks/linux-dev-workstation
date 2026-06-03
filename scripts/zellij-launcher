@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+if [ -f "$HOME/.config/machine-type" ]; then
+    ROLE=$(cat "$HOME/.config/machine-type")
+else
+    ROLE="laptop"
+fi
+
+LAYOUT_DIR="$HOME/.config/zellij/layouts"
+
+if [ "$ROLE" = "escritorio" ]; then
+    exec zellij --layout "$LAYOUT_DIR/pc1.kdl"
+else
+    exec zellij --layout "$LAYOUT_DIR/laptop.kdl"
+fi
