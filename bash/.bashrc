@@ -93,3 +93,22 @@ export NO_COLOR=1
 # Sincronización robusta
 alias dotpull='cd ~/dotfiles && git pull origin main && stow -t ~ .'
 alias dotpush='cd ~/dotfiles && scripts/export_configs.sh'
+
+# Identidad local de la máquina
+if [ -f "$HOME/.config/machine-type" ]; then
+    export MODO_PC=$(cat "$HOME/.config/machine-type")
+else
+    export MODO_PC="laptop"
+fi
+
+# Selector inteligente de layout
+zellij-work() {
+    local layout_pc1="$HOME/dotfiles/zellij/layouts/pc1.kdl"
+    local layout_laptop="$HOME/dotfiles/zellij/layouts/laptop.kdl"
+
+    if [ "$MODO_PC" = "escritorio" ]; then
+        exec zellij --layout "$layout_pc1"
+    else
+        exec zellij --layout "$layout_laptop"
+    fi
+}

@@ -11,7 +11,6 @@ snap list | awk 'NR>1 {print $1}' | grep -vE 'core|snapd|bare|gtk' > ~/dotfiles/
 echo "Copiando configuraciones a ~/dotfiles..."
 cp -r ~/.config/fastfetch ~/dotfiles/.config/
 cp -r ~/.config/btop ~/dotfiles/.config/
-cp -r ~/.config/zellij ~/dotfiles/.config/
 
 # 3. Empujar todo
 echo "Subiendo cambios..."
