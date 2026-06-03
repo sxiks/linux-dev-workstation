@@ -1,1 +1,14 @@
-*.swp
+# Logs de btop (archivos de runtime, no de configuración)
+.config/btop/btop.log
+.config/btop/btop.log.1
+
+# Backups locales generados manualmente
+*.bak
+config_backup.kdl
+config.kdl.bak
+
+# Archivos de conflicto de Syncthing
+*.sync-conflict-*
+
+# El directorio de backups si lo agregas al repo accidentalmente
+backups/
