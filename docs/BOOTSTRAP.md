@@ -33,40 +33,20 @@ cd ~/dotfiles
 ```bash
 stow --restow -t ~ .
 ```
-
 ---
 
-# 4. Configurar tipo de máquina
-
-Laptop:
+# 4. Ejecutar instalador
 
 ```bash
-echo "laptop" > ~/.config/machine-type
+cd ~/dotfiles
+
+chmod +x install.sh
+
+./install.sh
 ```
-
-Torre:
-
-```bash
-echo "escritorio" > ~/.config/machine-type
-```
-
-Verificar:
-
-```bash
-cat ~/.config/machine-type
-```
-
 ---
 
-# 5. Reaplicar enlaces
-
-```bash
-stow --restow -t ~ .
-```
-
----
-
-# 6. Instalar aplicaciones
+# 5. Instalar aplicaciones
 
 ```bash
 ./import_apps.sh
