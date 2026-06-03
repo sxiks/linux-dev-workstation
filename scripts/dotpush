@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+cd "$HOME/dotfiles"
+
+echo "→ Estado actual:"
+git status --short
+
+echo ""
+read -rp "¿Continuar? [s/N] " confirm
+
+[[ "$confirm" =~ ^[sS]$ ]] || exit 0
+
+echo ""
+read -rp "Mensaje commit: " msg
+
+[[ -n "$msg" ]] || exit 1
+
+git add .
+git commit -m "$msg"
+git push origin main
+
+echo ""
+echo "✓ dotpush completado"

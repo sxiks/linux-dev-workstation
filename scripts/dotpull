@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "→ Actualizando repositorio..."
+cd "$HOME/dotfiles"
+
+git pull origin main
+
+echo "→ Reaplicando Stow..."
+stow --restow -t ~ .
+
+echo ""
+echo "✓ dotpull completado"
