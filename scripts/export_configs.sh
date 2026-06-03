@@ -1,17 +1,17 @@
-#!/bin/bash
-echo "--- Iniciando exportación de configuraciones y listas ---"
+#!/usr/bin/env bash
 
-# 1. Exportar listas de paquetes
-echo "Generando listas de paquetes..."
-apt-mark showmanual > ~/dotfiles/apt_packages.txt
-flatpak list --app --columns=application > ~/dotfiles/flatpak_packages.txt
-snap list | awk 'NR>1 {print $1}' | grep -vE 'core|snapd|bare|gtk' > ~/dotfiles/snap_packages.txt
+echo "Configuraciones gestionadas por Stow:"
+echo ""
 
-# 2. Sincronizar carpetas de configuración
-echo "Copiando configuraciones a ~/dotfiles..."
-cp -r ~/.config/fastfetch ~/dotfiles/.config/
-cp -r ~/.config/btop ~/dotfiles/.config/
+echo "~/.config/zellij     → dotfiles/.config/zellij"
+echo "~/.config/kitty      → dotfiles/.config/kitty"
+echo "~/.config/fastfetch  → dotfiles/.config/fastfetch"
+echo "~/.config/yazi       → dotfiles/.config/yazi"
 
-# 3. Empujar todo
-echo "Subiendo cambios..."
-git push origin main
+echo ""
+echo "No es necesario exportar configuraciones."
+echo "Editar ~/.config equivale a editar el repositorio."
+echo ""
+echo "Usa:"
+echo "  dotpush"
+echo "para sincronizar cambios."
