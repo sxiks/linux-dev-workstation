@@ -1,0 +1,73 @@
+[appearance]
+
+[appearance.themes]
+system_theme = true
+theme = "phenomenon"
+selected_system_themes = { dark = "dark", light = "light" }
+
+[appearance.vertical_tabs]
+enabled = false
+
+[appearance.window]
+zoom_level = 110
+
+[appearance.panes]
+focus_pane_on_hover = true
+should_dim_inactive_panes = true
+
+[appearance.text]
+notebook_font_size = 14.0
+font_size = 12.0
+font_name = "JetBrainsMono Nerd Font"
+ai_font_name = "JetBrainsMono Nerd Font"
+match_ai_font = false
+font_weight = "normal"
+
+[appearance.cursor]
+cursor_display_type = "bar"
+
+[terminal]
+
+[terminal.input]
+input_box_type_setting = "universal"
+honor_ps1 = false
+
+[agents]
+cloud_conversation_storage_enabled = true
+
+[agents.warp_agent]
+is_any_ai_enabled = true
+
+[agents.warp_agent.input]
+nld_in_terminal_enabled = false
+
+[agents.warp_agent.other]
+show_agent_notifications = true
+show_conversation_history = true
+should_render_use_agent_toolbar_for_user_commands = false
+
+[agents.third_party]
+should_render_cli_agent_toolbar = true
+
+[account]
+is_settings_sync_enabled = true
+
+[general]
+default_session_mode = "agent"
+
+[code]
+
+[code.editor]
+show_code_review_button = true
+show_project_explorer = true
+show_global_search = true
+
+[warp_drive]
+enabled = true
+
+[privacy]
+telemetry_enabled = true
+crash_reporting_enabled = true
+
+[system]
+force_x11 = false
