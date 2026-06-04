@@ -14,3 +14,4 @@ config.kdl.bak
 backups/
 
 warp/.config/warp-terminal/user_preferences.json
+warp/.config/warp-terminal/settings.toml
