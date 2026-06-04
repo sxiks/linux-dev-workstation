@@ -1,0 +1,37 @@
+# ~/.config/starship.toml
+format = """
+[╭─](#6c7086)$os$directory$git_branch$git_status$python$nodejs
+[╰─](#6c7086)$character
+"""
+
+[os]
+disabled = false
+format = "[$symbol]($style) "
+style = "bold #89b4fa"
+
+[os.symbols]
+Debian = " "
+
+[directory]
+style = "bold #89b4fa"
+format = "[$path]($style) "
+truncation_length = 3
+truncate_to_repo = false
+
+[git_branch]
+symbol = " "
+style = "bold #cba6f7"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "bold #f38ba8"
+format = '([$all_status$ahead_behind]($style) )'
+
+[python]
+symbol = " "
+style = "bold #f9e2af"
+format = "[$symbol$version]($style) "
+
+[character]
+success_symbol = "[❯](bold #a6e3a1)"
+error_symbol = "[❯](bold #f38ba8)"

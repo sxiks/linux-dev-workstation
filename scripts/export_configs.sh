@@ -9,6 +9,7 @@ echo "~/.config/fastfetch  → dotfiles/fastfetch"
 echo "~/.config/yazi       → dotfiles/yazi"
 echo "~/.config/fish       → dotfiles/fish"
 echo "~/.config/gitui      → dotfiles/gitui"
+echo "~/.config/starship   → dotfiles/starship"
 
 echo ""
 echo "No es necesario exportar configuraciones."
