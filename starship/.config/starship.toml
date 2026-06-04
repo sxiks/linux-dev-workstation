@@ -1,3 +1,4 @@
+#test
 # ~/.config/starship.toml
 format = """
 [╭─](#6c7086)$os$directory$git_branch$git_status$python$nodejs
