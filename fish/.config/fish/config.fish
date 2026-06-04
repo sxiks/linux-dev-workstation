@@ -32,3 +32,9 @@ set -g fish_color_autosuggestion $gray
 set -g fish_color_search_match --background=$gray_dark
 
 set -g fish_color_selection --background=$gray_dark
+
+# Starship
+starship init fish | source
+
+# Atuin
+atuin init fish | source
