@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -e
 
-echo "→ Actualizando repositorio..."
-cd "$HOME/dotfiles"
+cd ~/dotfiles
 
-git pull origin main
+git stash -u >/dev/null 2>&1 || true
 
-echo "→ Reaplicando Stow..."
+git pull --rebase origin main
+
+git stash pop >/dev/null 2>&1 || true
+
 stow --restow -t ~ .
 
-echo ""
-echo "✓ dotpull completado"
+echo "Dotfiles sincronizados correctamente"

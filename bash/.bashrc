@@ -92,7 +92,7 @@ alias ya='yazi'
 alias kt='kitty'
 
 # Sincronización robusta
-alias dotpull='cd ~/dotfiles && git stash -u && git pull --rebase origin main && git stash pop && stow --restow -t ~ .'
+alias dotpull='~/dotfiles/scripts/dotpull'
 alias dotpush='cd ~/dotfiles && git status'
 
 # Identidad local de la máquina
