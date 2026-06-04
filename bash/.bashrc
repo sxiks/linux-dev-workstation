@@ -87,9 +87,10 @@ alias ll='ls -la'
 alias c='clear'
 alias zj='zellij'
 alias ya='yazi'
+
 #alias gitui='gitui -t ~/.config/gitui/theme.ron'
 alias kt='kitty'
-export NO_COLOR=1
+
 # Sincronización robusta
 alias dotpull='cd ~/dotfiles && git pull origin main && stow -t ~ .'
 alias dotpush='cd ~/dotfiles && scripts/export_configs.sh'
