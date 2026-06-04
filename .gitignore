@@ -12,3 +12,5 @@ config.kdl.bak
 
 # El directorio de backups si lo agregas al repo accidentalmente
 backups/
+
+warp/.config/warp-terminal/user_preferences.json
