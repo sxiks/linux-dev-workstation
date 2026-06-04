@@ -1,0 +1,35 @@
+(
+    selected_tab: LightCyan,
+
+    command_fg: White,
+
+    selection_bg: Blue,
+    selection_fg: White,
+
+    cmdbar_bg: Black,
+    cmdbar_extra_lines_bg: Black,
+
+    disabled_fg: DarkGray,
+
+    diff_line_add: Green,
+    diff_line_delete: Red,
+
+    diff_file_added: LightGreen,
+    diff_file_removed: LightRed,
+
+    diff_file_moved: LightCyan,
+    diff_file_modified: Yellow,
+
+    commit_hash: DarkGray,
+    commit_time: DarkGray,
+
+    commit_author: LightBlue,
+
+    danger_fg: LightRed,
+
+    push_gauge_bg: DarkGray,
+    push_gauge_fg: LightGreen,
+
+    tag_fg: Yellow,
+    branch_fg: LightCyan,
+)

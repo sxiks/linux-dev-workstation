@@ -3,10 +3,12 @@
 echo "Configuraciones gestionadas por Stow:"
 echo ""
 
-echo "~/.config/zellij     → dotfiles/.config/zellij"
-echo "~/.config/kitty      → dotfiles/.config/kitty"
-echo "~/.config/fastfetch  → dotfiles/.config/fastfetch"
-echo "~/.config/yazi       → dotfiles/.config/yazi"
+echo "~/.config/zellij     → dotfiles/zellij"
+echo "~/.config/kitty      → dotfiles/kitty"
+echo "~/.config/fastfetch  → dotfiles/fastfetch"
+echo "~/.config/yazi       → dotfiles/yazi"
+echo "~/.config/fish       → dotfiles/fish"
+echo "~/.config/gitui      → dotfiles/gitui"
 
 echo ""
 echo "No es necesario exportar configuraciones."
