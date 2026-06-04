@@ -92,8 +92,8 @@ alias ya='yazi'
 alias kt='kitty'
 
 # Sincronización robusta
-alias dotpull='cd ~/dotfiles && git pull origin main && stow -t ~ .'
-alias dotpush='cd ~/dotfiles && scripts/export_configs.sh'
+alias dotpull='cd ~/dotfiles && git pull --rebase origin main && stow --restow -t ~ .'
+alias dotpush='cd ~/dotfiles && git status'
 
 # Identidad local de la máquina
 if [ -f "$HOME/.config/machine-type" ]; then

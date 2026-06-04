@@ -77,8 +77,15 @@ echo "================================="
 echo ""
 echo "Próximos pasos:"
 echo ""
-echo "1. Ejecutar import_apps.sh"
-echo "2. Ejecutar import_gnome.sh"
-echo "3. Configurar Syncthing"
-echo "4. Reiniciar sesión GNOME"
+echo "1. Instalar paquetes necesarios"
+echo "2. Configurar machine-type"
+echo "3. Verificar enlaces de Stow"
+echo "4. Iniciar sesión en Warp"
+echo "5. Configurar Syncthing"
 echo ""
+echo "Verificando enlaces importantes..."
+
+readlink -f ~/.config/fish/config.fish 2>/dev/null || true
+readlink -f ~/.config/gitui/theme.ron 2>/dev/null || true
+readlink -f ~/.config/starship.toml 2>/dev/null || true
+readlink -f ~/.config/warp-terminal/settings.toml 2>/dev/null || true
