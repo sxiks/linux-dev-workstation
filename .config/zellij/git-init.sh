@@ -9,7 +9,7 @@ NC='\033[0m'
 
 clear
 
-cd ~/proyectos || exit
+cd ~/github || exit
 
 # ── GITFLOW ────────────────────────────────────────
 echo -e "\n${MUTED}─── GITFLOW ──────────────────────────────────${NC}"

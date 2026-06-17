@@ -74,7 +74,7 @@
 
                 pane size="40%" command="bash" {
 
-                    args "-c" "cd /home/sxiks/proyectos_sena/frontend-fundamentals 2>/dev/null || cd ~/dotfiles; exec /home/sxiks/bin/gitui"
+                    args "-c" "cd /home/sxiks/github/programming-fundamentals 2>/dev/null || cd ~/dotfiles; exec /home/sxiks/bin/gitui"
 
                 }
 

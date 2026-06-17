@@ -33,7 +33,7 @@ layout {
                 }
                 pane size="40%" {
                     command "/home/sxiks/bin/gitui"
-                    cwd "/home/sxiks/proyectos_sena/frontend-fundamentals"
+                    cwd "/home/sxiks/github/programming-fundamentals"
                 }
             }
         }
