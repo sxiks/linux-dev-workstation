@@ -1,3 +1,4 @@
 com.github.marktext.marktext
 com.obsproject.Studio
 io.dbeaver.DBeaverCommunity
+org.localsend.localsend_app

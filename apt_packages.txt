@@ -2169,7 +2169,6 @@ tecla
 tex-common
 texlive-base
 texlive-binaries
-tilix
 tilix-common
 timeshift
 timgm6mb-soundfont
@@ -2211,6 +2210,7 @@ vim-common
 vim-tiny
 vulkan-tools
 wamerican
+warp-terminal
 wayland-protocols
 webp-pixbuf-loader
 wget
