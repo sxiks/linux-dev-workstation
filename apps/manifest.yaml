@@ -1,0 +1,427 @@
+# ~/dotfiles/apps/manifest.yaml
+#
+# Fuente única de verdad del estado deseado de APLICACIONES/SOFTWARE INSTALADO.
+# La CONFIGURACIÓN (Kitty, Zellij, Yazi, Fish, Starship, etc.) sigue gestionada
+# por separado mediante dotfiles + GNU Stow. Este archivo nunca representa
+# configuración, solo software instalado.
+#
+# Este archivo NO se sobrescribe automáticamente: export_apps.sh solo
+# propone cambios mediante diff, siempre con confirmación explícita.
+#
+# scope: common  -> comportamiento por defecto, se aplica a todas las máquinas.
+# scope: machine -> excepción explícita, solo aplica a las máquinas listadas.
+# state: absent  -> puramente declarativo/informativo (no provoca desinstalación).
+# preferred: true -> máximo una entrada por equivalence_id; es la única instalable.
+# install_policy: manual -> nunca se instala automáticamente. Se usa tanto para
+#                            binarios sin automatización aún resuelta, como para
+#                            CUALQUIER entrada preferred:false (duplicada/rota),
+#                            y para managers que requieren pasos de seguridad
+#                            no automatizados todavía (ej. apt_third_party_repo).
+# install_policy: auto   -> candidata a instalación automática por import_apps,
+#                            solo si además preferred:true y status:ok.
+#
+# NOTA: OpenCode queda deliberadamente FUERA de este manifest. Ver
+# docs/PENDING_ARCHITECTURE.md (a crear en fase posterior) — versión y hash
+# del binario divergen entre PC1 y PC2, no cumple el criterio de
+# reproducibilidad usado para el resto de entradas binary.
+
+apps:
+
+  # ---------------------------------------------------------------------
+  # Zen Browser
+  # ---------------------------------------------------------------------
+  - app: app.zen_browser.zen
+    display_name: "Zen Browser"
+    manager: flatpak
+    equivalence_id: zen-browser
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source: {}
+    notes: "Instalado inicialmente en PC1 (flatpak --user). Declarado common por decisión explícita (2026-08-14): una app instalada intencionalmente debe poder propagarse. Pendiente instalar en PC2 vía import_apps."
+
+  # ---------------------------------------------------------------------
+  # MarkText
+  # ---------------------------------------------------------------------
+  - app: com.github.marktext.marktext
+    display_name: "MarkText"
+    manager: flatpak
+    equivalence_id: marktext
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source: {}
+    notes: "Fuente preferida. Presente en PC1 y PC2."
+
+  - app: marktext
+    display_name: "MarkText"
+    manager: snap
+    equivalence_id: marktext
+    scope: machine
+    machines: [laptop]
+    state: present
+    status: duplicate
+    preferred: false
+    install_policy: manual
+    source: {}
+    notes: "Duplicado funcional del Flatpak, presente solo en PC2. No se propaga ni se instala automáticamente. Pendiente decisión de desinstalación en fase de limpieza separada."
+
+  # ---------------------------------------------------------------------
+  # DBeaver
+  # ---------------------------------------------------------------------
+  - app: io.dbeaver.DBeaverCommunity
+    display_name: "DBeaver Community"
+    manager: flatpak
+    equivalence_id: dbeaver
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source: {}
+    notes: "Presente en PC1 y PC2, sin conflictos detectados."
+
+  # ---------------------------------------------------------------------
+  # LocalSend
+  # ---------------------------------------------------------------------
+  - app: org.localsend.localsend_app
+    display_name: "LocalSend"
+    manager: flatpak
+    equivalence_id: localsend
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source: {}
+    notes: "Presente en PC1 y PC2, sin conflictos detectados."
+
+  # ---------------------------------------------------------------------
+  # Tangram
+  # ---------------------------------------------------------------------
+  - app: re.sonny.Tangram
+    display_name: "Tangram"
+    manager: flatpak
+    equivalence_id: tangram
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source: {}
+    notes: "Presente en PC1 y PC2, sin conflictos detectados."
+
+  # ---------------------------------------------------------------------
+  # OBS Studio
+  # ---------------------------------------------------------------------
+  - app: com.obsproject.Studio
+    display_name: "OBS Studio"
+    manager: flatpak
+    equivalence_id: obs-studio
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source: {}
+    notes: "Instalado inicialmente en PC1. Declarado common por decisión explícita (2026-08-14). Pendiente instalar en PC2."
+
+  # ---------------------------------------------------------------------
+  # Solanum
+  # ---------------------------------------------------------------------
+  - app: org.gnome.Solanum
+    display_name: "Solanum"
+    manager: flatpak
+    equivalence_id: solanum
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source: {}
+    notes: "Instalado inicialmente en PC1. Declarado common por decisión explícita (2026-08-14). Pendiente instalar en PC2."
+
+  # ---------------------------------------------------------------------
+  # pgAdmin
+  # ---------------------------------------------------------------------
+  - app: org.pgadmin.pgadmin4
+    display_name: "pgAdmin 4"
+    manager: flatpak
+    equivalence_id: pgadmin
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source: {}
+    notes: "Instalado inicialmente en PC2. Declarado common por decisión explícita (2026-08-14). Pendiente instalar en PC1."
+
+  # ---------------------------------------------------------------------
+  # GitUI
+  # ---------------------------------------------------------------------
+  - app: gitui
+    display_name: "GitUI"
+    manager: binary
+    equivalence_id: gitui
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: manual
+    source:
+      origin: "https://github.com/gitui-org/gitui"
+      version: "v0.28.1"
+      arch: "x86_64-linux"
+      download_method: "github_release_asset"
+      verification: "sha256:bebbfb2b178c007078cd3f0002209fbd773061cf3b5fc6d8f4ef0e7d46d22397"
+      destination: "~/bin/gitui"
+    notes: "Instalación canónica confirmada en C0: mismo hash y versión en PC1 y PC2. Es la ruta efectivamente usada por $PATH (~/bin antes de /usr/local/bin)."
+
+  - app: gitui-usrlocal
+    display_name: "GitUI (copia /usr/local/bin, PC1)"
+    manager: binary
+    equivalence_id: gitui
+    scope: machine
+    machines: [escritorio]
+    state: present
+    status: duplicate
+    preferred: false
+    install_policy: manual
+    source:
+      origin: "https://github.com/gitui-org/gitui"
+      version: "v0.28.1"
+      arch: "x86_64-linux"
+      download_method: "github_release_asset"
+      verification: "sha256:bebbfb2b178c007078cd3f0002209fbd773061cf3b5fc6d8f4ef0e7d46d22397"
+      destination: "/usr/local/bin/gitui"
+    notes: "Copia idéntica (mismo hash) detectada solo en PC1 durante C0. No se usa realmente porque ~/bin precede en PATH. Documentada como duplicado pendiente de limpieza en fase posterior. No eliminar todavía."
+
+  - app: gitui
+    display_name: "GitUI"
+    manager: snap
+    equivalence_id: gitui
+    scope: machine
+    machines: [laptop]
+    state: present
+    status: duplicate
+    preferred: false
+    install_policy: manual
+    source: {}
+    notes: "Snap presente solo en PC2, redundante frente al binario preferido. No se instala ni se propaga. Pendiente decisión de desinstalación."
+
+  # ---------------------------------------------------------------------
+  # LazyGit
+  # ---------------------------------------------------------------------
+  - app: lazygit
+    display_name: "LazyGit"
+    manager: binary
+    equivalence_id: lazygit
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: manual
+    source:
+      origin: "https://github.com/jesseduffield/lazygit"
+      version: "v0.62.1"
+      arch: "x86_64-linux"
+      download_method: "github_release_asset"
+      verification: "sha256:79ca3b02267b2f612d6aea9ec90c3a37e9c887df100cefc244cd393b31f09ada"
+      destination: "/usr/local/bin/lazygit"
+    notes: "Verificado en C0 contra el release oficial v0.62.1 (commit f2788e4, build 2026-05-28). Presente solo en PC1. Pendiente instalar manualmente en PC2 — install_policy=manual, no se automatiza."
+
+  - app: lazygit
+    display_name: "LazyGit"
+    manager: snap
+    equivalence_id: lazygit
+    scope: machine
+    machines: [escritorio]
+    state: present
+    status: broken
+    preferred: false
+    install_policy: manual
+    source: {}
+    notes: "Snap roto detectado en C0, versión congelada en 0.34 (2022). Nunca se instala. Pendiente decisión de desinstalación en fase de limpieza separada."
+
+  # ---------------------------------------------------------------------
+  # Kitty (software instalado; su CONFIGURACIÓN vive en Stow, no aquí)
+  # ---------------------------------------------------------------------
+  - app: kitty
+    display_name: "Kitty"
+    manager: apt
+    equivalence_id: kitty
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source:
+      origin: "Debian 13 (trixie) main repository"
+      version: "0.41.1-2+deb13u2"
+      arch: "amd64"
+      download_method: "apt"
+      verification: "dpkg -l confirma versión idéntica en PC1 y PC2"
+      destination: "apt (paquete kitty; kitty-doc, kitty-shell-integration, kitty-terminfo como dependencias asociadas)"
+    notes: "Solo representa el software instalado. La configuración (~/.config/kitty) sigue gestionada por dotfiles + Stow, no por este manifest."
+
+  # ---------------------------------------------------------------------
+  # Fish (software instalado; su CONFIGURACIÓN vive en Stow, no aquí)
+  # ---------------------------------------------------------------------
+  - app: fish
+    display_name: "Fish shell"
+    manager: apt
+    equivalence_id: fish
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source:
+      origin: "Debian 13 (trixie) main repository"
+      version: "4.0.2-1"
+      arch: "amd64"
+      download_method: "apt"
+      verification: "dpkg -l confirma versión idéntica en PC1 y PC2"
+      destination: "apt (paquete fish; fish-common como dependencia asociada)"
+    notes: "Solo representa el software instalado. La configuración (~/.config/fish) ya está gestionada por dotfiles + Stow (ver commits históricos 'feat: add fish and gitui to managed dotfiles')."
+
+  # ---------------------------------------------------------------------
+  # Yazi (software instalado; su CONFIGURACIÓN vive en Stow, no aquí)
+  # ---------------------------------------------------------------------
+  - app: yazi
+    display_name: "Yazi"
+    manager: binary
+    equivalence_id: yazi
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: manual
+    source:
+      origin: null   # PENDIENTE: no confirmado todavía (probable GitHub Release, no verificado)
+      version: "26.1.22"
+      arch: "x86_64-linux"
+      download_method: null   # PENDIENTE de confirmar
+      verification: "sha256:6569094c3ab008c7f0ed4ee8375c3a81a62dba3446465b54b16a33dc425845b8 (idéntico en PC1 y PC2)"
+      destination: "/usr/local/bin/yazi"
+    notes: "Hash idéntico confirmado en PC1 y PC2 (build 2026-01-22), lo que demuestra reproducibilidad cruzada. origin/download_method quedan explícitamente pendientes de confirmar — no se inventan. La configuración (~/.config/yazi) ya está gestionada por Stow."
+
+  # ---------------------------------------------------------------------
+  # Zellij (software instalado; su CONFIGURACIÓN/layouts viven en Stow, no aquí)
+  # ---------------------------------------------------------------------
+  - app: zellij
+    display_name: "Zellij"
+    manager: binary
+    equivalence_id: zellij
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: manual
+    source:
+      origin: null   # PENDIENTE: no confirmado todavía (probable GitHub Release, no verificado)
+      version: "0.44.1"
+      arch: "x86_64-linux"
+      download_method: null   # PENDIENTE de confirmar
+      verification: "sha256:8b65f939e396e1da7718fb62e2305438e2e2da1dee1d6ba92887499df720ea85 (idéntico en PC1 y PC2)"
+      destination: "/usr/local/bin/zellij"
+    notes: "Hash idéntico confirmado en PC1 y PC2 (build 2026-04-07), lo que demuestra reproducibilidad cruzada. origin/download_method quedan explícitamente pendientes de confirmar — no se inventan. La configuración/layouts (~/.config/zellij, incluyendo pc1.kdl y laptop.kdl) ya está gestionada por Stow y NO se toca en esta fase."
+
+  # ---------------------------------------------------------------------
+  # Starship (software instalado; su CONFIGURACIÓN vive en Stow, no aquí)
+  # ---------------------------------------------------------------------
+  - app: starship-manual
+    display_name: "Starship (binario manual, /usr/local/bin)"
+    manager: binary
+    equivalence_id: starship
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: manual
+    source:
+      origin: "https://github.com/starship/starship"
+      version: "v1.24.2"
+      arch: "x86_64-unknown-linux-gnu"
+      download_method: "github_release_asset"
+      verification: "sha256:e41335e5a6ae8939139cf8fb02cb50eae4c500ef25d45da090bb7f26e8e2ecdc (idéntico en PC1 y PC2); build_time 2025-12-30 coincide con el release oficial v1.24.2"
+      destination: "/usr/local/bin/starship"
+    notes: "Es el binario realmente en uso: $PATH resuelve /usr/local/bin antes que /usr/bin. Más reciente que la versión de apt. Confirmado como release oficial."
+
+  - app: starship
+    display_name: "Starship (paquete apt, /usr/bin)"
+    manager: apt
+    equivalence_id: starship
+    scope: machine
+    machines: [escritorio, laptop]
+    state: present
+    status: duplicate
+    preferred: false
+    install_policy: manual
+    source:
+      origin: "Debian 13 (trixie) main repository"
+      version: "1.22.1-5"
+      arch: "amd64"
+      download_method: "apt"
+      verification: "sha256:4c2b123da1a23a5dd8ac147f915e398b92e280ee25f74c9cf7b9f76c480ff7e0 (idéntico en PC1 y PC2)"
+      destination: "apt (paquete starship)"
+    notes: "Versión más antigua que el binario manual, no es la que usa el sistema ($PATH). Documentado, no desinstalado todavía."
+
+  # ---------------------------------------------------------------------
+  # Warp (repo apt de terceros — solo descriptivo, sin automatizar todavía)
+  # ---------------------------------------------------------------------
+  - app: warp-terminal
+    display_name: "Warp Terminal"
+    manager: apt
+    equivalence_id: warp-terminal
+    scope: common
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: manual   # deliberado: NO automatizar repos/claves de terceros todavía
+    source:
+      origin: "https://releases.warp.dev/linux/deb"
+      repo_url: "https://releases.warp.dev/linux/deb"
+      repo_line: "deb [arch=amd64 signed-by=/etc/apt/keyrings/warpdotdev.gpg] https://releases.warp.dev/linux/deb stable main"
+      key_url: null   # PENDIENTE: no se capturó la URL de descarga original de la clave, solo se confirmó su presencia en /etc/apt/keyrings/warpdotdev.gpg
+      version: "0.2026.08.12.21.54.stable.00"
+      arch: "amd64"
+      download_method: "apt_third_party_repo"
+      verification: "Repo file /etc/apt/sources.list.d/warpdotdev.list y clave warpdotdev.gpg idénticos en PC1 y PC2; versión instalada idéntica"
+      destination: "apt (paquete warp-terminal)"
+    notes: "Descrito estructuralmente para reproducibilidad futura. NO se automatiza la adición de repos/claves de terceros en esta fase — install_policy=manual de forma deliberada, pendiente de una fase separada con sus propias validaciones de seguridad."
+
+# ---------------------------------------------------------------------
+# PENDIENTES DE ARQUITECTURA (fuera del ciclo instalar/declarar/sincronizar)
+# ---------------------------------------------------------------------
+# OpenCode:
+#   - PC1: v1.17.13 (hash ae98d78e...), paquete @opencode-ai v1.14.29
+#   - PC2: v1.14.50 (hash 2c4abf29...), paquete @opencode-ai v1.14.30
+#   - Versión y hash del binario DIVERGEN entre máquinas; incluso la versión
+#     del binario y la del paquete @opencode-ai no coinciden dentro de la
+#     misma máquina. No cumple el criterio de reproducibilidad usado para
+#     el resto de entradas 'binary' (GitUI/LazyGit/Yazi/Zellij/Starship).
+#   - Pendiente decidir: versión fija vs. auto-updater propio, estrategia de
+#     actualización, manejo de Skills/MCPs/config, separación config/secretos.
+#   - Se abordará en una fase de arquitectura específica, separada de C1.
+#   - NO se incluye como entrada instalable de este manifest.
