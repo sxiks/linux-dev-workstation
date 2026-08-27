@@ -1,0 +1,19 @@
+# ~/dotfiles/apps/equivalences.yaml
+#
+# Tabla explícita de alias: mapea (manager, app_id) conocidos hacia un
+# equivalence_id ya existente en manifest.yaml. Se usa ÚNICAMENTE como
+# sugerencia durante export_apps.sh --apply; toda coincidencia requiere
+# confirmación explícita del usuario, nunca se aplica automáticamente.
+#
+# Formato de clave: "<manager>:<app_id>"
+
+aliases:
+  "flatpak:com.github.marktext.marktext": marktext
+  "snap:marktext": marktext
+  "binary:gitui": gitui
+  "binary:gitui-usrlocal": gitui
+  "snap:gitui": gitui
+  "binary:lazygit": lazygit
+  "snap:lazygit": lazygit
+  "binary:starship-manual": starship
+  "apt:starship": starship
