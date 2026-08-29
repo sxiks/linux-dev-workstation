@@ -25,6 +25,19 @@
 # del binario divergen entre PC1 y PC2, no cumple el criterio de
 # reproducibilidad usado para el resto de entradas binary.
 
+#
+# install_scope: user | system  (NUEVO — C3-G)
+#   flatpak -> user o system, según dónde esté realmente instalada la app.
+#   apt     -> siempre system (invariante dura).
+#   snap    -> siempre system (invariante dura).
+#   binary  -> debe coincidir con source.destination (invariante dura):
+#              ~/...  -> user
+#              /usr/... , /opt/... -> system
+#   Una app instalada en cualquiera de los dos scopes (flatpak) cuenta como
+#   instalada. import_apps.sh NUNCA mueve una app entre scopes ni la
+#   reinstala para "corregir" el scope; solo advierte con [WARN] si el
+#   scope real difiere del declarado.
+
 apps:
 
   # ---------------------------------------------------------------------
@@ -35,6 +48,7 @@ apps:
     manager: flatpak
     equivalence_id: zen-browser
     scope: common
+    install_scope: user
     machines: []
     state: present
     status: ok
@@ -51,6 +65,7 @@ apps:
     manager: flatpak
     equivalence_id: marktext
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -64,6 +79,7 @@ apps:
     manager: snap
     equivalence_id: marktext
     scope: machine
+    install_scope: system
     machines: [laptop]
     state: present
     status: duplicate
@@ -80,6 +96,7 @@ apps:
     manager: flatpak
     equivalence_id: dbeaver
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -96,6 +113,7 @@ apps:
     manager: flatpak
     equivalence_id: localsend
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -112,6 +130,7 @@ apps:
     manager: flatpak
     equivalence_id: tangram
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -128,6 +147,7 @@ apps:
     manager: flatpak
     equivalence_id: obs-studio
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -144,6 +164,7 @@ apps:
     manager: flatpak
     equivalence_id: solanum
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -160,6 +181,7 @@ apps:
     manager: flatpak
     equivalence_id: pgadmin
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -176,6 +198,7 @@ apps:
     manager: binary
     equivalence_id: gitui
     scope: common
+    install_scope: user
     machines: []
     state: present
     status: ok
@@ -195,6 +218,7 @@ apps:
     manager: binary
     equivalence_id: gitui
     scope: machine
+    install_scope: system
     machines: [escritorio]
     state: present
     status: duplicate
@@ -214,6 +238,7 @@ apps:
     manager: snap
     equivalence_id: gitui
     scope: machine
+    install_scope: system
     machines: [laptop]
     state: present
     status: duplicate
@@ -230,6 +255,7 @@ apps:
     manager: binary
     equivalence_id: lazygit
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -249,6 +275,7 @@ apps:
     manager: snap
     equivalence_id: lazygit
     scope: machine
+    install_scope: system
     machines: [escritorio]
     state: present
     status: broken
@@ -265,6 +292,7 @@ apps:
     manager: apt
     equivalence_id: kitty
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -287,6 +315,7 @@ apps:
     manager: apt
     equivalence_id: fish
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -309,6 +338,7 @@ apps:
     manager: binary
     equivalence_id: yazi
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -331,6 +361,7 @@ apps:
     manager: binary
     equivalence_id: zellij
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -353,6 +384,7 @@ apps:
     manager: binary
     equivalence_id: starship
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -372,6 +404,7 @@ apps:
     manager: apt
     equivalence_id: starship
     scope: machine
+    install_scope: system
     machines: [escritorio, laptop]
     state: present
     status: duplicate
@@ -394,6 +427,7 @@ apps:
     manager: apt
     equivalence_id: warp-terminal
     scope: common
+    install_scope: system
     machines: []
     state: present
     status: ok
@@ -425,3 +459,74 @@ apps:
 #     actualización, manejo de Skills/MCPs/config, separación config/secretos.
 #   - Se abordará en una fase de arquitectura específica, separada de C1.
 #   - NO se incluye como entrada instalable de este manifest.
+
+  # ---------------------------------------------------------------------
+  # Firefox (nueva, C3-G) — paquete oficial Debian, mismo estándar que Kitty/Fish
+  # ---------------------------------------------------------------------
+  - app: firefox-esr
+    display_name: "Firefox (ESR)"
+    manager: apt
+    equivalence_id: firefox
+    scope: common
+    install_scope: system
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: auto
+    source:
+      origin: "Debian 13 (trixie) main repository"
+      version: "140.14.0esr-1~deb13u1"
+      arch: "amd64"
+      download_method: "apt"
+      verification: "dpkg -l confirma versión idéntica en PC1 y PC2"
+      destination: "apt (paquete firefox-esr)"
+    notes: "Verificado en ambas máquinas: mismo paquete, misma versión. Paquete oficial de Debian, mismo estándar de confianza que Kitty/Fish."
+
+  # ---------------------------------------------------------------------
+  # Spotify (nueva, C3-G) — origen NO confirmado, manual deliberado
+  # ---------------------------------------------------------------------
+  - app: spotify-client
+    display_name: "Spotify"
+    manager: apt
+    equivalence_id: spotify
+    scope: common
+    install_scope: system
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: manual
+    source:
+      origin: null
+      version: "1:1.2.79.427.g80eb4a07"
+      arch: "amd64"
+      download_method: null
+      verification: null
+      destination: "apt (paquete spotify-client)"
+    notes: "Versión idéntica en PC1 y PC2, pero /etc/apt/sources.list.d/spotify.list tiene la línea 'deb http://repository.spotify.com stable non-free' COMENTADA. No hay evidencia de un repo activo desde el cual sea reproducible instalar este paquete en una máquina nueva. install_policy=manual deliberado hasta confirmar el origen real."
+
+  # ---------------------------------------------------------------------
+  # Visual Studio Code (nueva, C3-G) — repo de terceros confirmado, igual que Warp
+  # ---------------------------------------------------------------------
+  - app: code
+    display_name: "Visual Studio Code"
+    manager: apt
+    equivalence_id: vscode
+    scope: common
+    install_scope: system
+    machines: []
+    state: present
+    status: ok
+    preferred: true
+    install_policy: manual
+    source:
+      origin: "https://packages.microsoft.com/repos/code"
+      repo_url: "https://packages.microsoft.com/repos/code"
+      key_url: "/usr/share/keyrings/microsoft.gpg"
+      version: "1.135.0-1787669172"
+      arch: "amd64"
+      download_method: "apt_third_party_repo"
+      verification: "apt-cache policy confirma https://packages.microsoft.com/repos/code como fuente activa en ambas máquinas; versión idéntica"
+      destination: "apt (paquete code)"
+    notes: "Confirmado: /etc/apt/sources.list.d/vscode.sources con URIs=https://packages.microsoft.com/repos/code y Signed-By=/usr/share/keyrings/microsoft.gpg. Mismo tratamiento que Warp: install_policy=manual, no se automatiza repo/clave en esta fase."
