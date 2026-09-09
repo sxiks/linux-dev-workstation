@@ -82,6 +82,14 @@ echo
 # --- 3a. Detección: Flatpak -> archivo temporal, una app por línea ---
 flatpak list --app --columns=application 2>/dev/null > "$TMPDIR/flatpak_installed.txt" || true
 
+# --- 3a-bis. Detección de scope real por app (C3-H) ---
+# Uso exclusivo: permitir que process() asigne install_scope a NUEVAS
+# entradas sin inventar el valor. No sustituye ni altera el listado
+# combinado de arriba (flatpak_installed.txt), que sigue siendo la única
+# fuente para el diff de "apps no declaradas" mostrado en --preview.
+flatpak list --app --user --columns=application 2>/dev/null > "$TMPDIR/flatpak_installed_user.txt" || true
+flatpak list --app --system --columns=application 2>/dev/null > "$TMPDIR/flatpak_installed_system.txt" || true
+
 # --- 3b. Detección: Snap, filtrado a type:app real (no bases/runtimes) ---
 : > "$TMPDIR/snap_apps.txt"
 : > "$TMPDIR/snap_status.txt"   # formato: name|status(ok|broken)
@@ -161,7 +169,8 @@ import sys, yaml, shutil, datetime, os
 
 def main():
     (manifest_path, equivalences_path, machine_type, mode,
-     flatpak_file, snap_apps_file, apt_status_file, binary_status_file) = sys.argv[1:9]
+     flatpak_file, snap_apps_file, apt_status_file, binary_status_file,
+     flatpak_user_file, flatpak_system_file) = sys.argv[1:11]
 
     data = yaml.safe_load(open(manifest_path))
     apps = data['apps']
@@ -181,6 +190,17 @@ def main():
     if os.path.isfile(snap_apps_file):
         with open(snap_apps_file) as f:
             snap_installed = {l.strip() for l in f if l.strip()}
+
+    # --- C3-H: sets de scope real de Flatpak, para determine_install_scope() ---
+    flatpak_user = set()
+    if os.path.isfile(flatpak_user_file):
+        with open(flatpak_user_file) as f:
+            flatpak_user = {l.strip() for l in f if l.strip()}
+
+    flatpak_system = set()
+    if os.path.isfile(flatpak_system_file):
+        with open(flatpak_system_file) as f:
+            flatpak_system = {l.strip() for l in f if l.strip()}
 
     undeclared_flatpak = sorted(flatpak_installed - declared_flatpak)
     undeclared_snap = sorted(snap_installed - declared_snap)
@@ -238,6 +258,42 @@ def main():
 
     new_entries = []
 
+    def determine_install_scope(app_id, manager):
+        """
+        Determina install_scope para una entrada nueva (invariantes C3-G),
+        sin inventar valores. Devuelve 'user' o 'system', o None si no se
+        puede determinar con seguridad -- en cuyo caso el llamador NO debe
+        escribir la entrada.
+        """
+        if manager == 'apt':
+            return 'system'   # invariante dura: apt siempre system
+        if manager == 'snap':
+            return 'system'   # invariante dura: snap siempre system
+        if manager == 'flatpak':
+            in_user = app_id in flatpak_user
+            in_system = app_id in flatpak_system
+            if in_user and not in_system:
+                return 'user'
+            if in_system and not in_user:
+                return 'system'
+            if in_user and in_system:
+                resp = input(
+                    f"  '{app_id}' está instalada en AMBOS scopes de Flatpak "
+                    f"(--user y --system) a la vez. install_scope no se puede "
+                    f"determinar automáticamente sin inventar un valor. "
+                    f"¿Cuál declaras como scope canónico? [user/system/omitir]: "
+                ).strip().lower()
+                if resp in ('user', 'system'):
+                    return resp
+                return None
+            # Ni en --user ni en --system: la detección no pudo confirmar
+            # el scope real. No se asume nada.
+            return None
+        # 'binary' nunca llega aquí: process() solo se invoca para flatpak
+        # y snap (únicos managers detectados como "no declarados"). Se deja
+        # explícito por seguridad ante cambios futuros de este script.
+        return None
+
     def process(app_id, manager):
         alias_key = f"{manager}:{app_id}"
         suggested_eq = alias_table.get(alias_key)
@@ -251,9 +307,16 @@ def main():
                 f"por otro manager). ¿Confirmas que es la misma app? [s/N]: "
             ).strip().lower()
             if resp == 's':
+                install_scope = determine_install_scope(app_id, manager)
+                if install_scope is None:
+                    print(f"  No se pudo determinar install_scope para "
+                          f"'{app_id}' con seguridad. Esta entrada NO se "
+                          f"escribirá; decláralo manualmente en manifest.yaml.")
+                    return
                 entry = {
                     'app': app_id, 'display_name': app_id, 'manager': manager,
                     'equivalence_id': suggested_eq, 'scope': 'machine',
+                    'install_scope': install_scope,
                     'machines': [machine_type], 'state': 'present',
                     'status': 'duplicate', 'preferred': False,
                     'install_policy': 'manual', 'source': {},
@@ -272,6 +335,13 @@ def main():
             print(f"  Valor no reconocido ('{scope_resp}'), se omite esta app por seguridad.")
             return
 
+        install_scope = determine_install_scope(app_id, manager)
+        if install_scope is None:
+            print(f"  No se pudo determinar install_scope para '{app_id}' "
+                  f"con seguridad. Esta entrada NO se escribirá; decláralo "
+                  f"manualmente en manifest.yaml.")
+            return
+
         default_eq = ''.join(c for c in app_id.lower() if c.isalnum() or c == '-')
         eq_id_resp = input(f"  equivalence_id [{default_eq}]: ").strip() or default_eq
         machines = [machine_type] if scope_resp == 'machine' else []
@@ -279,6 +349,7 @@ def main():
         entry = {
             'app': app_id, 'display_name': app_id, 'manager': manager,
             'equivalence_id': eq_id_resp, 'scope': scope_resp,
+            'install_scope': install_scope,
             'machines': machines, 'state': 'present', 'status': 'ok',
             'preferred': True, 'install_policy': 'auto', 'source': {},
             'notes': f'Agregado por export_apps.sh el {datetime.date.today()}.'
@@ -339,6 +410,27 @@ def revalidate(path):
             return False, f"{a['app']}: preferred:false pero install_policy != manual"
         if a['status'] == 'broken' and a['install_policy'] != 'manual':
             return False, f"{a['app']}: status:broken pero install_policy != manual"
+
+        # --- Invariantes de install_scope (C3-G), exigidas desde C3-H ---
+        install_scope = a.get('install_scope')
+        if install_scope not in ('user', 'system'):
+            return False, f"{a['app']}: install_scope inválido o ausente ('{install_scope}')"
+        if a['manager'] == 'apt' and install_scope != 'system':
+            return False, f"{a['app']}: manager apt exige install_scope:system"
+        if a['manager'] == 'snap' and install_scope != 'system':
+            return False, f"{a['app']}: manager snap exige install_scope:system"
+        if a['manager'] == 'binary':
+            dest = (a.get('source') or {}).get('destination')
+            if dest:
+                if dest.startswith('~'):
+                    expected_scope = 'user'
+                elif dest.startswith('/usr') or dest.startswith('/opt'):
+                    expected_scope = 'system'
+                else:
+                    expected_scope = None
+                if expected_scope and install_scope != expected_scope:
+                    return False, (f"{a['app']}: install_scope:{install_scope} no coincide "
+                                    f"con destination '{dest}' (esperado: {expected_scope})")
     return True, ""
 
 
@@ -350,7 +442,8 @@ PYEOF
 python3 "$TMPDIR/engine.py" \
   "$MANIFEST" "$EQUIVALENCES" "$MACHINE_TYPE" "$MODE" \
   "$TMPDIR/flatpak_installed.txt" "$TMPDIR/snap_apps.txt" \
-  "$TMPDIR/apt_status.txt" "$TMPDIR/binary_status.txt"
+  "$TMPDIR/apt_status.txt" "$TMPDIR/binary_status.txt" \
+  "$TMPDIR/flatpak_installed_user.txt" "$TMPDIR/flatpak_installed_system.txt"
 ENGINE_EXIT=$?
 
 echo

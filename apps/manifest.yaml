@@ -188,7 +188,7 @@ apps:
     preferred: true
     install_policy: auto
     source: {}
-    notes: "Instalado inicialmente en PC2. Declarado common por decisión explícita (2026-08-14). Pendiente instalar en PC1."
+    notes: "Instalado inicialmente en PC2 (flatpak --system). Declarado common por decisión explícita (2026-08-14). install_scope:system confirmado correcto contra ambas máquinas (2026-09-08): PC2 la tiene en scope system; ya NO está pendiente instalar en PC1 -- el usuario la instaló allí manualmente en su propia cuenta (flatpak --user) por necesidad urgente. import_apps.sh --preview real en PC1 reporta correctamente [WARN_SCOPE: declarado=system real=user]: es el comportamiento esperado, informativo, sin acción automática. Reconciliar el scope de PC1 con el declarado queda pendiente para una fase separada, si se decide hacerlo."
 
   # ---------------------------------------------------------------------
   # GitUI

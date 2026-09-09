@@ -95,6 +95,14 @@ fi
 # --- 4a. Detección: TODOS los flatpak instalados ---
 flatpak list --app --columns=application 2>/dev/null > "$TMPDIR/flatpak_installed.txt" || true
 
+# --- 4a-bis. Detección de scope real por app (C3-H) ---
+# Uso exclusivo: permitir comparar install_scope declarado contra el scope
+# real y emitir [WARN_SCOPE] informativo. No sustituye ni altera
+# flatpak_installed.txt de arriba, que sigue siendo la única fuente para
+# determinar si una app "está instalada" (en cualquiera de los dos scopes).
+flatpak list --app --user --columns=application 2>/dev/null > "$TMPDIR/flatpak_installed_user.txt" || true
+flatpak list --app --system --columns=application 2>/dev/null > "$TMPDIR/flatpak_installed_system.txt" || true
+
 # --- 4b. Detección: TODOS los snap instalados, filtrados a type:app ---
 : > "$TMPDIR/snap_installed.txt"
 is_snap_app() {
@@ -243,7 +251,8 @@ def classify(apps, machine_type, flatpak_set, snap_set, apt_status, binary_statu
     return candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope
 
 
-def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope):
+def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope,
+                   scope_warning_suffix):
     print("--- Candidatas automáticas (se instalarían con --apply) ---")
     if not candidatas:
         print("  (ninguna)")
@@ -255,7 +264,7 @@ def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fu
     if not ya_instaladas:
         print("  (ninguna)")
     for a in ya_instaladas:
-        print(f"  [OK] {a['display_name']:<20} {a['manager']:<8} {a['app']}")
+        print(f"  [OK] {a['display_name']:<20} {a['manager']:<8} {a['app']}{scope_warning_suffix(a)}")
     print()
 
     print("--- Bloqueadas por equivalencia ya instalada (sin acción) ---")
@@ -277,7 +286,7 @@ def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fu
         origin = src.get('origin') or src.get('repo_url') or 'pendiente'
         dest = src.get('destination', '-')
         print(f"  [MANUAL][{estado}] {a['display_name']:<18} {a['manager']:<8} "
-              f"v={version} origen={origin} destino={dest}")
+              f"v={version} origen={origin} destino={dest}{scope_warning_suffix(a)}")
     print()
 
     print("--- Ignoradas (broken / no preferidas, nunca candidatas) ---")
@@ -338,7 +347,8 @@ def verify_one(entry, flatpak_set_cmd, snap_set_cmd):
 
 def main():
     (manifest_path, machine_type, mode, flatpak_file, snap_file,
-     apt_status_file, binary_status_file, prereqs_file) = sys.argv[1:9]
+     apt_status_file, binary_status_file, prereqs_file,
+     flatpak_user_file, flatpak_system_file) = sys.argv[1:11]
 
     data = yaml.safe_load(open(manifest_path))
     apps = data['apps']
@@ -348,6 +358,38 @@ def main():
     apt_status = load_pairs(apt_status_file)
     binary_status = load_pairs(binary_status_file)
     prereqs = load_pairs(prereqs_file)
+
+    # --- C3-H: sets de scope real de Flatpak, solo para WARN_SCOPE informativo ---
+    flatpak_user_set = load_lines(flatpak_user_file)
+    flatpak_system_set = load_lines(flatpak_system_file)
+
+    def flatpak_actual_scope(app_id):
+        in_user = app_id in flatpak_user_set
+        in_system = app_id in flatpak_system_set
+        if in_user and in_system:
+            return 'both'
+        if in_user:
+            return 'user'
+        if in_system:
+            return 'system'
+        return None
+
+    def scope_warning_suffix(a):
+        """
+        Devuelve un sufijo informativo "[WARN_SCOPE: ...]" si el manager es
+        flatpak y el scope real difiere del declarado. NUNCA dispara ninguna
+        acción (ni reinstalación, ni movimiento entre scopes) -- es
+        puramente para el reporte impreso.
+        """
+        if a['manager'] != 'flatpak':
+            return ''
+        actual = flatpak_actual_scope(a['app'])
+        if actual is None or actual == 'both':
+            return ''
+        declared = a.get('install_scope')
+        if actual != declared:
+            return f"  [WARN_SCOPE: declarado={declared} real={actual}]"
+        return ''
 
     # Marcar estado "instalado" dentro de source para el reporte manual
     for a in apps:
@@ -370,7 +412,8 @@ def main():
             candidatas_ok.append(a)
     candidatas = candidatas_ok
 
-    print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope)
+    print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope,
+                  scope_warning_suffix)
 
     if mode == "preview":
         print("\n(Modo preview: no se instaló nada.)")
@@ -410,7 +453,8 @@ PYEOF
 python3 "$TMPDIR/engine.py" \
   "$MANIFEST" "$MACHINE_TYPE" "$MODE" \
   "$TMPDIR/flatpak_installed.txt" "$TMPDIR/snap_installed.txt" \
-  "$TMPDIR/apt_status.txt" "$TMPDIR/binary_status.txt" "$TMPDIR/prereqs.txt"
+  "$TMPDIR/apt_status.txt" "$TMPDIR/binary_status.txt" "$TMPDIR/prereqs.txt" \
+  "$TMPDIR/flatpak_installed_user.txt" "$TMPDIR/flatpak_installed_system.txt"
 ENGINE_EXIT=$?
 
 echo
