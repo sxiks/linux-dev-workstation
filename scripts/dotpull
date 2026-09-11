@@ -1,15 +1,68 @@
 #!/usr/bin/env bash
+#
+# ~/dotfiles/scripts/dotpull
+#
+# Interfaz segura para traer cambios del repositorio de dotfiles desde
+# GitHub y reaplicar Stow. Responsabilidad EXCLUSIVA: GitHub -> repositorio
+# local + Stow. NUNCA ejecuta import_apps.sh --apply, NUNCA instala o
+# desinstala software, NUNCA modifica manifest.yaml ni corrige scopes.
+#
+# Cada paso que puede fallar se reporta explícitamente y detiene la
+# cadena -- nunca continúa en silencio con "|| true".
 
-set -e
+set -euo pipefail
 
-cd ~/dotfiles
+cd "$HOME/dotfiles"
 
-git stash -u >/dev/null 2>&1 || true
+echo "=== git status (cambios locales) ==="
+git status --short
 
-git pull --rebase origin main
+STASHED=0
+if [[ -n "$(git status --porcelain)" ]]; then
+    echo
+    echo "AVISO: hay cambios locales sin commitear en este repositorio."
+    read -rp "¿Guardarlos temporalmente con git stash antes de hacer pull? [s/N]: " confirm_stash
+    if [[ ! "$confirm_stash" =~ ^[sS]$ ]]; then
+        echo "Cancelado. No se hizo pull ni se tocó nada."
+        exit 0
+    fi
+    if ! git stash push -u -m "dotpull-auto-$(date +%Y%m%d%H%M%S)"; then
+        echo "ERROR: git stash push falló. Abortando sin hacer pull." >&2
+        exit 1
+    fi
+    STASHED=1
+    echo "Cambios guardados en stash."
+fi
 
-git stash pop >/dev/null 2>&1 || true
+echo
+echo "=== git pull --rebase origin main ==="
+if ! git pull --rebase origin main; then
+    echo "ERROR: git pull --rebase falló (posible conflicto de rebase)." >&2
+    if [[ "$STASHED" -eq 1 ]]; then
+        echo "Tus cambios locales siguen a salvo en el stash. Después de resolver el rebase, ejecuta:" >&2
+        echo "  git stash pop" >&2
+    fi
+    echo "No se ejecutó stow. Resuelve el conflicto antes de continuar." >&2
+    exit 1
+fi
 
-stow --restow -t ~ .
+if [[ "$STASHED" -eq 1 ]]; then
+    echo
+    echo "=== git stash pop ==="
+    if ! git stash pop; then
+        echo "ERROR: git stash pop produjo un conflicto." >&2
+        echo "Resuelve los conflictos manualmente. Tus cambios siguen en el stash hasta que los apliques con éxito." >&2
+        echo "No se ejecutó stow -- el estado de Git aún no es coherente." >&2
+        exit 1
+    fi
+fi
 
-echo "Dotfiles sincronizados correctamente"
+echo
+echo "=== stow --restow -t ~ . ==="
+if ! stow --restow -t ~ .; then
+    echo "ERROR: stow --restow falló. Revisa la salida anterior." >&2
+    exit 1
+fi
+
+echo
+echo "✓ dotpull completado: repositorio actualizado y symlinks reaplicados."

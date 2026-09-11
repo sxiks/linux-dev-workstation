@@ -93,7 +93,6 @@ alias kt='kitty'
 
 # Sincronización robusta
 alias dotpull='~/dotfiles/scripts/dotpull'
-alias dotpush='cd ~/dotfiles && git status'
 
 # Identidad local de la máquina
 if [ -f "$HOME/.config/machine-type" ]; then
