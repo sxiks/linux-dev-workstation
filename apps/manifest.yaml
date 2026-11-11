@@ -224,7 +224,13 @@ apps:
       download_method: "github_release_asset"
       verification: "sha256:bebbfb2b178c007078cd3f0002209fbd773061cf3b5fc6d8f4ef0e7d46d22397"
       destination: "~/bin/gitui"
-    notes: "Instalación canónica confirmada en C0: mismo hash y versión en PC1 y PC2. Es la ruta efectivamente usada por $PATH (~/bin antes de /usr/local/bin)."
+    asset:
+      name: "gitui-linux-x86_64.tar.gz"
+      type: "tar_gz"
+    binaries:
+      - name: "gitui"
+        destination: "~/bin/gitui"
+    notes: "Instalación canónica confirmada en C0: mismo hash y versión en PC1 y PC2. Es la ruta efectivamente usada por $PATH (~/bin antes de /usr/local/bin). Etapa A: asset/binaries verificados contra el release real v0.28.1 (2026-09-11) -- install_policy se mantiene manual hasta validar --apply de forma controlada."
 
   - app: gitui-usrlocal
     display_name: "GitUI (copia /usr/local/bin, PC1)"
@@ -281,7 +287,13 @@ apps:
       download_method: "github_release_asset"
       verification: "sha256:79ca3b02267b2f612d6aea9ec90c3a37e9c887df100cefc244cd393b31f09ada"
       destination: "/usr/local/bin/lazygit"
-    notes: "Verificado en C0 contra el release oficial v0.62.1 (commit f2788e4, build 2026-05-28). Presente solo en PC1. Pendiente instalar manualmente en PC2 — install_policy=manual, no se automatiza."
+    asset:
+      name: "lazygit_{version}_linux_x86_64.tar.gz"
+      type: "tar_gz"
+    binaries:
+      - name: "lazygit"
+        destination: "/usr/local/bin/lazygit"
+    notes: "Verificado en C0 contra el release oficial v0.62.1 (commit f2788e4, build 2026-05-28). Presente solo en PC1. Pendiente instalar manualmente en PC2 — install_policy=manual, no se automatiza. Etapa A: asset.name 'lazygit_{version}_linux_x86_64.tar.gz' confirmado DIRECTAMENTE contra la URL real de descarga de GitHub para v0.62.1 (2026-09-12, Content-Disposition de la URL firmada: 'lazygit_0.62.1_linux_x86_64.tar.gz') -- coincide exactamente con lo ya declarado, sin cambios necesarios."
 
   - app: lazygit
     display_name: "LazyGit"
@@ -358,13 +370,21 @@ apps:
     preferred: true
     install_policy: manual
     source:
-      origin: null   # PENDIENTE: no confirmado todavía (probable GitHub Release, no verificado)
+      origin: "https://github.com/sxyazi/yazi"   # confirmado en Etapa A (2026-09-11), antes era null por no estar verificado
       version: "26.1.22"
       arch: "x86_64-linux"
-      download_method: null   # PENDIENTE de confirmar
+      download_method: null   # sigue sin confirmar (Etapa A no lo necesita: solo lee origin/version)
       verification: "sha256:6569094c3ab008c7f0ed4ee8375c3a81a62dba3446465b54b16a33dc425845b8 (idéntico en PC1 y PC2)"
       destination: "/usr/local/bin/yazi"
-    notes: "Hash idéntico confirmado en PC1 y PC2 (build 2026-01-22), lo que demuestra reproducibilidad cruzada. origin/download_method quedan explícitamente pendientes de confirmar — no se inventan. La configuración (~/.config/yazi) ya está gestionada por Stow."
+    asset:
+      name: "yazi-x86_64-unknown-linux-musl.zip"
+      type: "zip"
+    binaries:
+      - name: "yazi-x86_64-unknown-linux-musl/yazi"
+        destination: "/usr/local/bin/yazi"
+      - name: "yazi-x86_64-unknown-linux-musl/ya"
+        destination: "/usr/local/bin/ya"
+    notes: "Hash idéntico confirmado en PC1 y PC2 (build 2026-01-22), lo que demuestra reproducibilidad cruzada. La configuración (~/.config/yazi) ya está gestionada por Stow. Etapa A (2026-09-11): origin confirmado contra el release real v26.1.22 (variante musl, no gnu); download_method se mantiene null -- el motor nuevo no lo necesita, solo lee origin/version. El .zip contiene una subcarpeta 'yazi-x86_64-unknown-linux-musl/' con los binarios 'yazi' y 'ya' dentro -- reflejado en binaries[].name como ruta relativa, no solo nombre de archivo."
 
   # ---------------------------------------------------------------------
   # Zellij (software instalado; su CONFIGURACIÓN/layouts viven en Stow, no aquí)
@@ -381,13 +401,19 @@ apps:
     preferred: true
     install_policy: manual
     source:
-      origin: null   # PENDIENTE: no confirmado todavía (probable GitHub Release, no verificado)
+      origin: "https://github.com/zellij-org/zellij"   # confirmado en Etapa A (2026-09-11), antes era null por no estar verificado
       version: "0.44.1"
       arch: "x86_64-linux"
-      download_method: null   # PENDIENTE de confirmar
+      download_method: null   # sigue sin confirmar (Etapa A no lo necesita: solo lee origin/version)
       verification: "sha256:8b65f939e396e1da7718fb62e2305438e2e2da1dee1d6ba92887499df720ea85 (idéntico en PC1 y PC2)"
       destination: "/usr/local/bin/zellij"
-    notes: "Hash idéntico confirmado en PC1 y PC2 (build 2026-04-07), lo que demuestra reproducibilidad cruzada. origin/download_method quedan explícitamente pendientes de confirmar — no se inventan. La configuración/layouts (~/.config/zellij, incluyendo pc1.kdl y laptop.kdl) ya está gestionada por Stow y NO se toca en esta fase."
+    asset:
+      name: "zellij-x86_64-unknown-linux-musl.tar.gz"
+      type: "tar_gz"
+    binaries:
+      - name: "zellij"
+        destination: "/usr/local/bin/zellij"
+    notes: "Hash idéntico confirmado en PC1 y PC2 (build 2026-04-07), lo que demuestra reproducibilidad cruzada. La configuración/layouts (~/.config/zellij, incluyendo pc1.kdl y laptop.kdl) ya está gestionada por Stow y NO se toca en esta fase. Etapa A (2026-09-11): origin confirmado; download_method se mantiene null -- el motor nuevo no lo necesita, solo lee origin/version. Patrón de asset 'zellij-x86_64-unknown-linux-musl.tar.gz' verificado estable en múltiples versiones reales (v0.31.3 a v0.41.2)."
 
   # ---------------------------------------------------------------------
   # Helix (nueva, 2026-11-11) — binario en ~/bin, idéntico en PC1 y PC2
@@ -429,11 +455,17 @@ apps:
     source:
       origin: "https://github.com/starship/starship"
       version: "v1.24.2"
-      arch: "x86_64-unknown-linux-gnu"
+      arch: "x86_64-unknown-linux-musl"   # corregido en Etapa A (2026-11-11): antes decía gnu; el binario instalado es la variante musl
       download_method: "github_release_asset"
       verification: "sha256:e41335e5a6ae8939139cf8fb02cb50eae4c500ef25d45da090bb7f26e8e2ecdc (idéntico en PC1 y PC2); build_time 2025-12-30 coincide con el release oficial v1.24.2"
       destination: "/usr/local/bin/starship"
-    notes: "Es el binario realmente en uso: $PATH resuelve /usr/local/bin antes que /usr/bin. Más reciente que la versión de apt. Confirmado como release oficial."
+    asset:
+      name: "starship-x86_64-unknown-linux-musl.tar.gz"
+      type: "tar_gz"
+    binaries:
+      - name: "starship"
+        destination: "/usr/local/bin/starship"
+    notes: "Es el binario realmente en uso: $PATH resuelve /usr/local/bin antes que /usr/bin. Más reciente que la versión de apt. Confirmado como release oficial. Etapa A (2026-11-11): el sha256 del binario dentro de starship-x86_64-unknown-linux-musl.tar.gz (v1.24.2) coincide con el instalado en PC1 (e41335e5...); la variante gnu del mismo release tiene otro hash (2a24f4de...), por eso arch pasa de gnu a musl. El miembro 'starship' está en la raíz del archivo. install_policy se mantiene manual hasta validar --apply de forma controlada."
 
   - app: starship
     display_name: "Starship (paquete apt, /usr/bin)"
