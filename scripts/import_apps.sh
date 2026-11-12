@@ -14,6 +14,15 @@
 #   ./import_apps.sh --preview --check-releases   (consulta la API de GitHub)
 #   ./import_apps.sh --apply
 #   ./import_apps.sh --apply --machine=escritorio
+#   ./import_apps.sh --apply --exclude=org.gnome.Solanum
+#   ./import_apps.sh --apply --only=app.zen_browser.zen,com.obsproject.Studio --yes
+#
+# Ajustes de selección para UNA ejecución (M3); no modifican ningún archivo:
+#   --groups=a,b    usa estos grupos en vez de los de apps/machines/<machine-type>.yaml
+#   --exclude=x,y   además, deja fuera estas apps (por id del manifest)
+#   --only=x,y      considera solo estas apps; no se combina con --groups ni --exclude
+#   --yes           con --apply, instala sin pedir confirmación (bootstrap)
+# Sin terminal interactiva, --apply exige --yes. Los flags pueden repetirse.
 #
 # --check-releases: verifica contra la API pública de GitHub (sin token,
 # 60 consultas/hora por IP) que el asset declarado de cada binario existe
@@ -27,6 +36,12 @@ MANIFEST="$DOTFILES_DIR/apps/manifest.yaml"
 MODE="preview"
 MACHINE_OVERRIDE=""
 CHECK_RELEASES="0"
+# Listas separadas por comas; cada flag añade su valor seguido de una coma,
+# así un valor vacío (--groups=) se detecta como error en el motor.
+SEL_GROUPS=""
+SEL_ONLY=""
+SEL_EXCLUDE=""
+ASSUME_YES="0"
 
 for arg in "$@"; do
   case "$arg" in
@@ -34,9 +49,18 @@ for arg in "$@"; do
     --apply) MODE="apply" ;;
     --machine=*) MACHINE_OVERRIDE="${arg#*=}" ;;
     --check-releases) CHECK_RELEASES="1" ;;
+    --groups=*) SEL_GROUPS="${SEL_GROUPS}${arg#*=}," ;;
+    --only=*) SEL_ONLY="${SEL_ONLY}${arg#*=}," ;;
+    --exclude=*) SEL_EXCLUDE="${SEL_EXCLUDE}${arg#*=}," ;;
+    --yes) ASSUME_YES="1" ;;
     *) echo "Argumento desconocido: $arg" >&2; exit 1 ;;
   esac
 done
+
+if [[ "$ASSUME_YES" == "1" && "$MODE" != "apply" ]]; then
+  echo "ERROR: --yes solo tiene sentido con --apply." >&2
+  exit 1
+fi
 
 TMPDIR="$(mktemp -d)"
 cleanup() { rm -rf "$TMPDIR"; }
@@ -187,7 +211,7 @@ python3 -B "$ENGINE" \
   "$TMPDIR/flatpak_installed.txt" "$TMPDIR/snap_installed.txt" \
   "$TMPDIR/apt_status.txt" "$TMPDIR/binary_status.txt" "$TMPDIR/prereqs.txt" \
   "$TMPDIR/flatpak_installed_user.txt" "$TMPDIR/flatpak_installed_system.txt" \
-  "$CHECK_RELEASES"
+  "$CHECK_RELEASES" "$SEL_GROUPS" "$SEL_ONLY" "$SEL_EXCLUDE" "$ASSUME_YES"
 ENGINE_EXIT=$?
 
 echo
