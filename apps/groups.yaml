@@ -1,0 +1,20 @@
+# apps/groups.yaml -- catálogo de grupos de apps (M2).
+#
+# Cada entrada del manifest declara sus grupos con el campo 'groups'.
+# 'default' es implícito y no se declara aquí: agrupa las entradas que no
+# tienen 'groups' (por ejemplo, las que export_apps.sh añade).
+# Cada máquina elige sus grupos en apps/machines/<machine-type>.yaml.
+
+groups:
+  terminal:
+    description: "Terminales, shell, prompt y herramientas de consola"
+  dev:
+    description: "Desarrollo: Git, editor de código y bases de datos"
+  web:
+    description: "Navegadores"
+  productividad:
+    description: "Notas, foco y organización"
+  media:
+    description: "Grabación y música"
+  utilidades:
+    description: "Utilidades del sistema y transferencia de archivos"

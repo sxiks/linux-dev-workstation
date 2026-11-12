@@ -7,6 +7,8 @@ import_engine.py y export_engine.py, movido sin cambios de lógica.
 import os
 import yaml
 
+from selection import load_group_catalog
+
 
 def load_lines(path):
     if not os.path.isfile(path):
@@ -42,6 +44,9 @@ def validate_manifest(path):
     """
     d = yaml.safe_load(open(path))
     apps = d['apps']
+    known_groups, error = load_group_catalog(os.path.dirname(os.path.abspath(path)))
+    if error:
+        return False, error
     groups = {}
     for a in apps:
         groups.setdefault(a['equivalence_id'], []).append(a)
@@ -75,4 +80,14 @@ def validate_manifest(path):
                 if expected_scope and install_scope != expected_scope:
                     return False, (f"{a['app']}: install_scope:{install_scope} no coincide "
                                     f"con destination '{dest}' (esperado: {expected_scope})")
+
+        # --- Grupos (M2): opcionales; si existen, deben estar en apps/groups.yaml ---
+        if 'groups' in a:
+            groups = a['groups']
+            if not isinstance(groups, list) or not groups or \
+                    not all(isinstance(g, str) for g in groups):
+                return False, f"{a['app']}: 'groups' debe ser una lista no vacía de textos"
+            for g in groups:
+                if g not in known_groups:
+                    return False, f"{a['app']}: grupo desconocido '{g}' (no está en apps/groups.yaml)"
     return True, ""

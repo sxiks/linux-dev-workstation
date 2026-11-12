@@ -27,6 +27,11 @@
 # version (managers apt): "última versión observada", solo informativa. Ningún
 # script la exige; los paquetes APT se actualizan con apt upgrade.
 #
+# groups: [<grupo>, ...]  (M2) -> grupos de apps/groups.yaml a los que
+#   pertenece la entrada. Sin 'groups' la entrada pertenece a 'default'.
+#   Cada máquina elige grupos en apps/machines/<machine-type>.yaml; una
+#   entrada no elegida no se propone, pero nunca se desinstala.
+#
 # NOTA: OpenCode queda deliberadamente FUERA de este manifest. Ver
 # docs/PENDING_ARCHITECTURE.md (a crear en fase posterior) — versión y hash
 # del binario divergen entre PC1 y PC2, no cumple el criterio de
@@ -54,6 +59,7 @@ apps:
     display_name: "Zen Browser"
     manager: flatpak
     equivalence_id: zen-browser
+    groups: [web]
     scope: common
     install_scope: user
     machines: []
@@ -71,6 +77,7 @@ apps:
     display_name: "MarkText"
     manager: flatpak
     equivalence_id: marktext
+    groups: [productividad]
     scope: common
     install_scope: system
     machines: []
@@ -85,6 +92,7 @@ apps:
     display_name: "MarkText"
     manager: snap
     equivalence_id: marktext
+    groups: [productividad]
     scope: machine
     install_scope: system
     machines: [laptop]
@@ -102,6 +110,7 @@ apps:
     display_name: "DBeaver Community"
     manager: flatpak
     equivalence_id: dbeaver
+    groups: [dev]
     scope: common
     install_scope: system
     machines: []
@@ -119,6 +128,7 @@ apps:
     display_name: "LocalSend"
     manager: apt
     equivalence_id: localsend
+    groups: [utilidades]
     scope: common
     install_scope: system
     machines: []
@@ -142,6 +152,7 @@ apps:
     display_name: "Tangram"
     manager: flatpak
     equivalence_id: tangram
+    groups: [productividad]
     scope: common
     install_scope: system
     machines: []
@@ -159,6 +170,7 @@ apps:
     display_name: "OBS Studio"
     manager: flatpak
     equivalence_id: obs-studio
+    groups: [media]
     scope: common
     install_scope: system
     machines: []
@@ -176,6 +188,7 @@ apps:
     display_name: "Solanum"
     manager: flatpak
     equivalence_id: solanum
+    groups: [productividad]
     scope: common
     install_scope: system
     machines: []
@@ -193,6 +206,7 @@ apps:
     display_name: "pgAdmin 4"
     manager: flatpak
     equivalence_id: pgadmin
+    groups: [dev]
     scope: common
     install_scope: system
     machines: []
@@ -210,6 +224,7 @@ apps:
     display_name: "GitUI"
     manager: binary
     equivalence_id: gitui
+    groups: [dev]
     scope: common
     install_scope: user
     machines: []
@@ -236,6 +251,7 @@ apps:
     display_name: "GitUI (copia /usr/local/bin, PC1)"
     manager: binary
     equivalence_id: gitui
+    groups: [dev]
     scope: machine
     install_scope: system
     machines: [escritorio]
@@ -256,6 +272,7 @@ apps:
     display_name: "GitUI"
     manager: snap
     equivalence_id: gitui
+    groups: [dev]
     scope: machine
     install_scope: system
     machines: [laptop]
@@ -273,6 +290,7 @@ apps:
     display_name: "LazyGit"
     manager: binary
     equivalence_id: lazygit
+    groups: [dev]
     scope: common
     install_scope: system
     machines: []
@@ -299,6 +317,7 @@ apps:
     display_name: "LazyGit"
     manager: snap
     equivalence_id: lazygit
+    groups: [dev]
     scope: machine
     install_scope: system
     machines: [escritorio]
@@ -316,6 +335,7 @@ apps:
     display_name: "Kitty"
     manager: apt
     equivalence_id: kitty
+    groups: [terminal]
     scope: common
     install_scope: system
     machines: []
@@ -339,6 +359,7 @@ apps:
     display_name: "Fish shell"
     manager: apt
     equivalence_id: fish
+    groups: [terminal]
     scope: common
     install_scope: system
     machines: []
@@ -362,6 +383,7 @@ apps:
     display_name: "Yazi"
     manager: binary
     equivalence_id: yazi
+    groups: [terminal]
     scope: common
     install_scope: system
     machines: []
@@ -393,6 +415,7 @@ apps:
     display_name: "Zellij"
     manager: binary
     equivalence_id: zellij
+    groups: [terminal]
     scope: common
     install_scope: system
     machines: []
@@ -422,6 +445,7 @@ apps:
     display_name: "Helix"
     manager: binary
     equivalence_id: helix
+    groups: [terminal]
     scope: common
     install_scope: user
     machines: []
@@ -445,6 +469,7 @@ apps:
     display_name: "Starship (binario manual, /usr/local/bin)"
     manager: binary
     equivalence_id: starship
+    groups: [terminal]
     scope: common
     install_scope: system
     machines: []
@@ -471,6 +496,7 @@ apps:
     display_name: "Starship (paquete apt, /usr/bin)"
     manager: apt
     equivalence_id: starship
+    groups: [terminal]
     scope: machine
     install_scope: system
     machines: [escritorio, laptop]
@@ -494,6 +520,7 @@ apps:
     display_name: "Warp Terminal"
     manager: apt
     equivalence_id: warp-terminal
+    groups: [terminal]
     scope: common
     install_scope: system
     machines: []
@@ -535,6 +562,7 @@ apps:
     display_name: "Firefox (ESR)"
     manager: apt
     equivalence_id: firefox
+    groups: [web]
     scope: common
     install_scope: system
     machines: []
@@ -558,6 +586,7 @@ apps:
     display_name: "Spotify"
     manager: apt
     equivalence_id: spotify
+    groups: [media]
     scope: common
     install_scope: system
     machines: []
@@ -581,6 +610,7 @@ apps:
     display_name: "Visual Studio Code"
     manager: apt
     equivalence_id: vscode
+    groups: [dev]
     scope: common
     install_scope: system
     machines: []
