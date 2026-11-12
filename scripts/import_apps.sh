@@ -70,14 +70,20 @@ echo
 # --- 3. Prerrequisitos por manager ---
 : > "$TMPDIR/prereqs.txt"
 
+# Flatpak: el remote flathub se comprueba POR SCOPE, porque cada candidata
+# se instala en el scope que declara (install_scope). Claves: flatpak_user
+# y flatpak_system.
 if command -v flatpak >/dev/null 2>&1; then
-  if flatpak remotes --user --columns=name 2>/dev/null | grep -qi '^flathub$'; then
-    echo "flatpak|ok" >> "$TMPDIR/prereqs.txt"
-  else
-    echo "flatpak|no_flathub" >> "$TMPDIR/prereqs.txt"
-  fi
+  for fp_scope in user system; do
+    if flatpak remotes "--$fp_scope" --columns=name 2>/dev/null | grep -qi '^flathub$'; then
+      echo "flatpak_${fp_scope}|ok" >> "$TMPDIR/prereqs.txt"
+    else
+      echo "flatpak_${fp_scope}|no_flathub" >> "$TMPDIR/prereqs.txt"
+    fi
+  done
 else
-  echo "flatpak|missing" >> "$TMPDIR/prereqs.txt"
+  echo "flatpak_user|missing" >> "$TMPDIR/prereqs.txt"
+  echo "flatpak_system|missing" >> "$TMPDIR/prereqs.txt"
 fi
 
 if command -v snap >/dev/null 2>&1; then
@@ -131,7 +137,8 @@ for a in data['apps']:
 : > "$TMPDIR/apt_status.txt"
 while IFS= read -r pkg; do
   [[ -z "$pkg" ]] && continue
-  if dpkg -l "$pkg" 2>/dev/null | grep -q "^ii"; then
+  # ^[ih]i: instalado ('ii') o instalado y retenido con apt-mark hold ('hi').
+  if dpkg -l "$pkg" 2>/dev/null | grep -q "^[ih]i"; then
     echo "${pkg}|installed" >> "$TMPDIR/apt_status.txt"
   else
     echo "${pkg}|missing" >> "$TMPDIR/apt_status.txt"
@@ -618,7 +625,12 @@ def install_one(entry):
     m, app = entry['manager'], entry['app']
     try:
         if m == 'flatpak':
-            r = subprocess.run(['flatpak', 'install', '--user', '-y', 'flathub', app])
+            # Respeta install_scope declarado (solo para instalaciones NUEVAS;
+            # nunca se mueve ni reinstala lo que ya existe en otro scope).
+            if entry.get('install_scope') == 'system':
+                r = subprocess.run(['sudo', 'flatpak', 'install', '--system', '-y', 'flathub', app])
+            else:
+                r = subprocess.run(['flatpak', 'install', '--user', '-y', 'flathub', app])
         elif m == 'apt':
             r = subprocess.run(['sudo', 'apt-get', 'install', '-y', app])
         elif m == 'snap':
@@ -640,7 +652,7 @@ def verify_one(entry, flatpak_set_cmd, snap_set_cmd):
         return app in r.stdout.splitlines()
     if m == 'apt':
         r = subprocess.run(['dpkg', '-l', app], capture_output=True, text=True)
-        return any(l.startswith('ii') for l in r.stdout.splitlines())
+        return any(l.startswith(('ii', 'hi')) for l in r.stdout.splitlines())
     if m == 'snap':
         r = subprocess.run(['snap', 'list'], capture_output=True, text=True)
         return any(l.split()[0] == app for l in r.stdout.splitlines()[1:] if l.split())
@@ -705,11 +717,14 @@ def main():
     # Filtrar candidatas cuyo prerequisito de manager no esté ok
     candidatas_ok = []
     for a in candidatas:
-        estado_prereq = prereqs.get(a['manager'], 'missing')
+        prereq_key = a['manager']
+        if a['manager'] == 'flatpak':
+            prereq_key = f"flatpak_{a.get('install_scope')}"
+        estado_prereq = prereqs.get(prereq_key, 'missing')
         if estado_prereq != 'ok':
             manuales.append(a)  # degradar a manual con motivo de prerequisito
             print(f"AVISO: {a['display_name']} degradada a manual: "
-                  f"prerequisito de {a['manager']} no satisfecho ({estado_prereq}).")
+                  f"prerequisito de {prereq_key} no satisfecho ({estado_prereq}).")
         else:
             candidatas_ok.append(a)
     candidatas = candidatas_ok

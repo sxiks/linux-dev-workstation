@@ -128,8 +128,9 @@ for a in data['apps']:
 
 while IFS= read -r pkg; do
   [[ -z "$pkg" ]] && continue
-  if dpkg -l "$pkg" 2>/dev/null | grep -q "^ii"; then
-    ver="$(dpkg -l "$pkg" 2>/dev/null | awk '/^ii/{print $3}')"
+  # ^[ih]i: instalado ('ii') o instalado y retenido con apt-mark hold ('hi').
+  if dpkg -l "$pkg" 2>/dev/null | grep -q "^[ih]i"; then
+    ver="$(dpkg -l "$pkg" 2>/dev/null | awk '/^[ih]i/{print $3}')"
     echo "OK|$pkg|$ver" >> "$TMPDIR/apt_status.txt"
   else
     echo "MISSING|$pkg|-" >> "$TMPDIR/apt_status.txt"
