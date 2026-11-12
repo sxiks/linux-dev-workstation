@@ -1,0 +1,12 @@
+# apps/machines/laptop.yaml -- selección de la máquina 'laptop' (M2).
+#
+# groups:  grupos de apps/groups.yaml que esta máquina quiere ('default'
+#          recoge las entradas sin grupo).
+# include: apps sueltas (por id del manifest) que se quieren aunque su
+#          grupo no esté elegido.
+# exclude: apps (por id) que esta máquina no quiere aunque su grupo sí.
+#          Excluir nunca desinstala: solo deja de proponerla.
+
+groups: [default, terminal, dev, web, productividad, media, utilidades]
+include: []
+exclude: []

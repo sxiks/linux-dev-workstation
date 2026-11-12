@@ -1,7 +1,8 @@
 import sys, yaml, os, subprocess, json, hashlib, tarfile, zipfile, tempfile, shutil
 import urllib.request, urllib.error
 
-from common import load_lines, load_pairs, applies_to_machine
+from common import load_lines, load_pairs, applies_to_machine, validate_manifest
+from selection import load_group_catalog, load_machine_selection, is_selected
 
 
 # --- Etapa A: verificación e instalación de binarios vía GitHub Releases ---
@@ -310,9 +311,9 @@ def is_installed(entry, flatpak_set, snap_set, apt_status, binary_status):
     return False
 
 
-def classify(apps, machine_type, flatpak_set, snap_set, apt_status, binary_status):
+def classify(apps, machine_type, flatpak_set, snap_set, apt_status, binary_status, selection):
     candidatas, ya_instaladas, skip_equiv = [], [], []
-    manuales, ignoradas, fuera_scope = [], [], []
+    manuales, ignoradas, fuera_scope, fuera_seleccion = [], [], [], []
 
     installed_map = {}
     for a in apps:
@@ -322,6 +323,9 @@ def classify(apps, machine_type, flatpak_set, snap_set, apt_status, binary_statu
     for a in apps:
         if not applies_to_machine(a, machine_type):
             fuera_scope.append(a)
+            continue
+        if not is_selected(a, selection):
+            fuera_seleccion.append(a)
             continue
         if a['status'] == 'broken':
             ignoradas.append((a, 'broken'))
@@ -361,10 +365,10 @@ def classify(apps, machine_type, flatpak_set, snap_set, apt_status, binary_statu
 
         candidatas.append(a)
 
-    return candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope
+    return candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope, fuera_seleccion
 
 
-def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope,
+def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope, fuera_seleccion,
                    scope_warning_suffix, check_releases):
     print("--- Candidatas automáticas (se instalarían con --apply) ---")
     if not candidatas:
@@ -429,6 +433,14 @@ def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fu
         print(f"  [SCOPE] {a['display_name']:<20} machines={a.get('machines')}")
     print()
 
+    # Solo se imprime si la selección de la máquina deja algo fuera, para que
+    # una selección que lo incluye todo produzca exactamente la salida previa.
+    if fuera_seleccion:
+        print("--- Fuera de selección (no elegidas en apps/machines/<machine-type>.yaml) ---")
+        for a in fuera_seleccion:
+            print(f"  [SELECCIÓN] {a['display_name']:<20} {a['manager']:<8} grupos={a.get('groups') or ['default']}")
+        print()
+
     print("=== Resumen ===")
     print(f"{len(candidatas)} candidatas para instalar automáticamente.")
     print(f"{len(ya_instaladas)} ya instaladas (sin acción).")
@@ -436,6 +448,8 @@ def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fu
     print(f"{len(manuales)} declaradas manuales.")
     print(f"{len(ignoradas)} ignoradas (broken/duplicado).")
     print(f"{len(fuera_scope)} fuera de scope.")
+    if fuera_seleccion:
+        print(f"{len(fuera_seleccion)} fuera de selección.")
 
 
 def install_one(entry):
@@ -485,6 +499,23 @@ def main():
     data = yaml.safe_load(open(manifest_path))
     apps = data['apps']
 
+    # --- M2: manifest válido y selección declarada de esta máquina ---
+    ok, error = validate_manifest(manifest_path)
+    if not ok:
+        print(f"ERROR: manifest inválido: {error}")
+        return 1
+    apps_dir = os.path.dirname(os.path.abspath(manifest_path))
+    known_groups, error = load_group_catalog(apps_dir)
+    if error:
+        print(f"ERROR: {error}")
+        return 1
+    selection, error = load_machine_selection(apps_dir, machine_type, known_groups, apps)
+    if error:
+        print(f"ERROR: {error}")
+        return 1
+    if selection['source'] is None:
+        print(f"AVISO: no existe apps/machines/{machine_type}.yaml: se seleccionan todos los grupos.")
+
     flatpak_set = load_lines(flatpak_file)
     snap_set = load_lines(snap_file)
     apt_status = load_pairs(apt_status_file)
@@ -529,8 +560,8 @@ def main():
         src['_installed'] = is_installed(a, flatpak_set, snap_set, apt_status, binary_status)
         a['source'] = src
 
-    candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope = classify(
-        apps, machine_type, flatpak_set, snap_set, apt_status, binary_status)
+    candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope, fuera_seleccion = classify(
+        apps, machine_type, flatpak_set, snap_set, apt_status, binary_status, selection)
 
     # Filtrar candidatas cuyo prerequisito de manager no esté ok
     candidatas_ok = []
@@ -547,7 +578,7 @@ def main():
             candidatas_ok.append(a)
     candidatas = candidatas_ok
 
-    print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope,
+    print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope, fuera_seleccion,
                   scope_warning_suffix, check_releases)
 
     if mode == "preview":
