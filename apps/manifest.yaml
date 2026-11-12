@@ -572,7 +572,7 @@ apps:
       download_method: null
       verification: null
       destination: "apt (paquete spotify-client)"
-    notes: "Versión idéntica en PC1 y PC2. Retenido a propósito (hold; dpkg -l muestra estado 'hi') en ambas máquinas, por decisión del usuario (2026-11-11). /etc/apt/sources.list.d/spotify.list tiene la línea 'deb http://repository.spotify.com stable non-free' COMENTADA: no hay evidencia de un repo activo desde el cual sea reproducible instalar este paquete en una máquina nueva. install_policy=manual hasta confirmar el origen real. Aviso: la detección '^ii' de export_apps.sh/import_apps.sh no reconoce paquetes retenidos y lo reporta [MISSING] aunque esté instalado (corrección de scripts pendiente, patch aparte)."
+    notes: "Versión idéntica en PC1 y PC2. Retenido a propósito (hold; dpkg -l muestra estado 'hi') en ambas máquinas, por decisión y conveniencia del usuario (2026-11-11): no se actualiza con apt upgrade. /etc/apt/sources.list.d/spotify.list tiene la línea 'deb http://repository.spotify.com stable non-free' COMENTADA: no hay evidencia de un repo activo desde el cual sea reproducible instalar este paquete en una máquina nueva. install_policy=manual hasta confirmar el origen real. export_apps.sh/import_apps.sh reconocen paquetes retenidos (estado 'hi') como instalados desde 2026-11-12; antes lo reportaban [MISSING]."
 
   # ---------------------------------------------------------------------
   # Visual Studio Code (nueva, C3-G) — repo de terceros confirmado, igual que Warp
