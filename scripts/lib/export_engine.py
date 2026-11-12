@@ -1,4 +1,5 @@
 import sys, yaml, shutil, datetime, os
+from common import load_lines, validate_manifest
 
 def main():
     (manifest_path, equivalences_path, machine_type, mode,
@@ -14,26 +15,14 @@ def main():
     declared_flatpak = {a['app'] for a in apps if a['manager'] == 'flatpak'}
     declared_snap = {a['app'] for a in apps if a['manager'] == 'snap'}
 
-    flatpak_installed = set()
-    if os.path.isfile(flatpak_file):
-        with open(flatpak_file) as f:
-            flatpak_installed = {l.strip() for l in f if l.strip()}
+    flatpak_installed = load_lines(flatpak_file)
 
-    snap_installed = set()
-    if os.path.isfile(snap_apps_file):
-        with open(snap_apps_file) as f:
-            snap_installed = {l.strip() for l in f if l.strip()}
+    snap_installed = load_lines(snap_apps_file)
 
     # --- C3-H: sets de scope real de Flatpak, para determine_install_scope() ---
-    flatpak_user = set()
-    if os.path.isfile(flatpak_user_file):
-        with open(flatpak_user_file) as f:
-            flatpak_user = {l.strip() for l in f if l.strip()}
+    flatpak_user = load_lines(flatpak_user_file)
 
-    flatpak_system = set()
-    if os.path.isfile(flatpak_system_file):
-        with open(flatpak_system_file) as f:
-            flatpak_system = {l.strip() for l in f if l.strip()}
+    flatpak_system = load_lines(flatpak_system_file)
 
     undeclared_flatpak = sorted(flatpak_installed - declared_flatpak)
     undeclared_snap = sorted(snap_installed - declared_snap)
@@ -215,7 +204,7 @@ def main():
     with open(manifest_path, 'w') as f:
         yaml.dump(data, f, allow_unicode=True, sort_keys=False, default_flow_style=False)
 
-    ok, error = revalidate(manifest_path)
+    ok, error = validate_manifest(manifest_path)
     if not ok:
         print(f"\nERROR de invariante tras escribir: {error}")
         print("Restaurando backup automáticamente...")
@@ -226,45 +215,6 @@ def main():
     print(f"Se agregaron {len(new_entries)} entrada(s) nueva(s).")
     print("Recuerda: esto NO hizo git add/commit/push. Eso sigue siendo manual (dotpush).")
     return 0
-
-
-def revalidate(path):
-    d = yaml.safe_load(open(path))
-    apps = d['apps']
-    groups = {}
-    for a in apps:
-        groups.setdefault(a['equivalence_id'], []).append(a)
-    for eq, entries in groups.items():
-        preferred = [e for e in entries if e['preferred']]
-        if len(preferred) > 1:
-            return False, f"equivalence_id '{eq}' tiene más de un preferred:true"
-    for a in apps:
-        if a['preferred'] is False and a['install_policy'] != 'manual':
-            return False, f"{a['app']}: preferred:false pero install_policy != manual"
-        if a['status'] == 'broken' and a['install_policy'] != 'manual':
-            return False, f"{a['app']}: status:broken pero install_policy != manual"
-
-        # --- Invariantes de install_scope (C3-G), exigidas desde C3-H ---
-        install_scope = a.get('install_scope')
-        if install_scope not in ('user', 'system'):
-            return False, f"{a['app']}: install_scope inválido o ausente ('{install_scope}')"
-        if a['manager'] == 'apt' and install_scope != 'system':
-            return False, f"{a['app']}: manager apt exige install_scope:system"
-        if a['manager'] == 'snap' and install_scope != 'system':
-            return False, f"{a['app']}: manager snap exige install_scope:system"
-        if a['manager'] == 'binary':
-            dest = (a.get('source') or {}).get('destination')
-            if dest:
-                if dest.startswith('~'):
-                    expected_scope = 'user'
-                elif dest.startswith('/usr') or dest.startswith('/opt'):
-                    expected_scope = 'system'
-                else:
-                    expected_scope = None
-                if expected_scope and install_scope != expected_scope:
-                    return False, (f"{a['app']}: install_scope:{install_scope} no coincide "
-                                    f"con destination '{dest}' (esperado: {expected_scope})")
-    return True, ""
 
 
 if __name__ == "__main__":

@@ -181,7 +181,8 @@ for a in data['apps']:
 " > "$TMPDIR/binary_status.txt"
 
 # --- 5. Motor Python: scripts/lib/import_engine.py (archivo real, stdin libre para input()) ---
-python3 "$ENGINE" \
+# -B: no escribe __pycache__ en scripts/lib al importar common.py.
+python3 -B "$ENGINE" \
   "$MANIFEST" "$MACHINE_TYPE" "$MODE" \
   "$TMPDIR/flatpak_installed.txt" "$TMPDIR/snap_installed.txt" \
   "$TMPDIR/apt_status.txt" "$TMPDIR/binary_status.txt" "$TMPDIR/prereqs.txt" \

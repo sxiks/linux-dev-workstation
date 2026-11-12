@@ -174,7 +174,8 @@ for a in data['apps']:
 
 # --- 4. Motor Python: scripts/lib/export_engine.py ---
 #      Se ejecuta como archivo real: stdin queda libre para input() en --apply.
-python3 "$ENGINE" \
+# -B: no escribe __pycache__ en scripts/lib al importar common.py.
+python3 -B "$ENGINE" \
   "$MANIFEST" "$EQUIVALENCES" "$MACHINE_TYPE" "$MODE" \
   "$TMPDIR/flatpak_installed.txt" "$TMPDIR/snap_apps.txt" \
   "$TMPDIR/apt_status.txt" "$TMPDIR/binary_status.txt" \
