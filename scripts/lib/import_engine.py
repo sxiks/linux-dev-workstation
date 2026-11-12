@@ -1,29 +1,7 @@
 import sys, yaml, os, subprocess, json, hashlib, tarfile, zipfile, tempfile, shutil
 import urllib.request, urllib.error
 
-def load_lines(path):
-    if not os.path.isfile(path):
-        return set()
-    with open(path) as f:
-        return {l.strip() for l in f if l.strip()}
-
-def load_pairs(path):
-    d = {}
-    if not os.path.isfile(path):
-        return d
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            k, v = line.split('|', 1)
-            d[k] = v
-    return d
-
-def applies_to_machine(entry, machine_type):
-    if entry['scope'] == 'common':
-        return True
-    return machine_type in (entry.get('machines') or [])
+from common import load_lines, load_pairs, applies_to_machine
 
 
 # --- Etapa A: verificación e instalación de binarios vía GitHub Releases ---
