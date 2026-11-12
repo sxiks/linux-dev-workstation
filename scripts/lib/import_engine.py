@@ -2,7 +2,8 @@ import sys, yaml, os, subprocess, json, hashlib, tarfile, zipfile, tempfile, shu
 import urllib.request, urllib.error
 
 from common import load_lines, load_pairs, applies_to_machine, validate_manifest
-from selection import load_group_catalog, load_machine_selection, is_selected
+from selection import (load_group_catalog, load_machine_selection, is_selected,
+                       parse_flag_list, apply_overrides)
 
 
 # --- Etapa A: verificación e instalación de binarios vía GitHub Releases ---
@@ -493,8 +494,10 @@ def verify_one(entry, flatpak_set_cmd, snap_set_cmd):
 def main():
     (manifest_path, machine_type, mode, flatpak_file, snap_file,
      apt_status_file, binary_status_file, prereqs_file,
-     flatpak_user_file, flatpak_system_file, check_releases_arg) = sys.argv[1:12]
+     flatpak_user_file, flatpak_system_file, check_releases_arg,
+     groups_arg, only_arg, exclude_arg, assume_yes_arg) = sys.argv[1:16]
     check_releases = (check_releases_arg == '1')
+    assume_yes = (assume_yes_arg == '1')
 
     data = yaml.safe_load(open(manifest_path))
     apps = data['apps']
@@ -515,6 +518,23 @@ def main():
         return 1
     if selection['source'] is None:
         print(f"AVISO: no existe apps/machines/{machine_type}.yaml: se seleccionan todos los grupos.")
+
+    # --- M3: ajustes de selección por flags, solo para esta ejecución ---
+    flag_lists = {}
+    for raw, flag in ((groups_arg, '--groups'), (only_arg, '--only'), (exclude_arg, '--exclude')):
+        values, error = parse_flag_list(raw, flag)
+        if error:
+            print(f"ERROR: {error}")
+            return 1
+        flag_lists[flag] = values
+    selection, error, overrides = apply_overrides(
+        selection, flag_lists['--groups'], flag_lists['--only'], flag_lists['--exclude'],
+        known_groups, apps)
+    if error:
+        print(f"ERROR: {error}")
+        return 1
+    if overrides:
+        print(f"Selección ajustada por flags (solo esta ejecución): {overrides}")
 
     flatpak_set = load_lines(flatpak_file)
     snap_set = load_lines(snap_file)
@@ -593,10 +613,16 @@ def main():
     for a in candidatas:
         print(f"  + {a['display_name']} ({a['manager']}: {a['app']})")
 
-    confirm = input("\n¿Proceder con estas instalaciones? [s/N]: ").strip().lower()
-    if confirm != 's':
-        print("Cancelado por el usuario. No se instaló nada.")
-        return 0
+    if assume_yes:
+        print("\nConfirmado por --yes.")
+    elif not sys.stdin.isatty():
+        print("\nERROR: --apply necesita una terminal para confirmar, o --yes. No se instaló nada.")
+        return 1
+    else:
+        confirm = input("\n¿Proceder con estas instalaciones? [s/N]: ").strip().lower()
+        if confirm != 's':
+            print("Cancelado por el usuario. No se instaló nada.")
+            return 0
 
     any_error = False
     for a in candidatas:

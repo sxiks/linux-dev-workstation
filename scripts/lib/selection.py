@@ -52,7 +52,7 @@ def load_machine_selection(apps_dir, machine_type, known_groups, apps):
     path = os.path.join(apps_dir, 'machines', f'{machine_type}.yaml')
     if not os.path.isfile(path):
         return {'groups': set(known_groups), 'include': set(),
-                'exclude': set(), 'source': None}, None
+                'exclude': set(), 'only': None, 'source': None}, None
 
     data = yaml.safe_load(open(path)) or {}
     if not isinstance(data, dict):
@@ -84,10 +84,61 @@ def load_machine_selection(apps_dir, machine_type, known_groups, apps):
         return None, f"{path}: apps a la vez en 'include' y 'exclude': {', '.join(both)}"
 
     return {'groups': set(lists['groups']), 'include': set(lists['include']),
-            'exclude': set(lists['exclude']), 'source': path}, None
+            'exclude': set(lists['exclude']), 'only': None, 'source': path}, None
+
+
+def parse_flag_list(raw, flag):
+    """
+    raw llega del script como 'a,b,' (cada uso del flag añade una coma final).
+    Devuelve (lista|None, error): None si el flag no se usó.
+    """
+    if raw == '':
+        return None, None
+    items = raw[:-1].split(',') if raw.endswith(',') else raw.split(',')
+    items = [i.strip() for i in items]
+    if any(i == '' for i in items):
+        return None, f"{flag}: valor vacío (formato: {flag}=a,b)"
+    return items, None
+
+
+def apply_overrides(selection, groups, only, exclude, known_groups, apps):
+    """
+    Ajusta la selección del archivo para UNA ejecución (M3), sin escribir
+    nada. Devuelve (selección, error, descripción). Reglas:
+      --groups  reemplaza los grupos; include/exclude del archivo siguen.
+      --exclude se suma a las exclusiones (y gana a un include del archivo).
+      --only    considera solo esas apps, ignorando grupos, include y exclude.
+    """
+    if only is not None and (groups is not None or exclude is not None):
+        return None, "--only no se combina con --groups ni con --exclude", None
+    app_ids = {a['app'] for a in apps}
+    parts = []
+    sel = dict(selection)
+    if groups is not None:
+        unknown = sorted(set(groups) - set(known_groups))
+        if unknown:
+            return None, f"--groups: grupos desconocidos: {', '.join(unknown)}", None
+        sel['groups'] = set(groups)
+        parts.append(f"grupos={','.join(groups)}")
+    if exclude is not None:
+        unknown = sorted(set(exclude) - app_ids)
+        if unknown:
+            return None, f"--exclude: apps que no están en el manifest: {', '.join(unknown)}", None
+        sel['exclude'] = set(sel['exclude']) | set(exclude)
+        sel['include'] = set(sel['include']) - set(exclude)
+        parts.append(f"excluir={','.join(exclude)}")
+    if only is not None:
+        unknown = sorted(set(only) - app_ids)
+        if unknown:
+            return None, f"--only: apps que no están en el manifest: {', '.join(unknown)}", None
+        sel['only'] = set(only)
+        parts.append(f"solo={','.join(only)}")
+    return sel, None, ('; '.join(parts) if parts else None)
 
 
 def is_selected(entry, selection):
+    if selection.get('only') is not None:
+        return entry['app'] in selection['only']
     if entry['app'] in selection['exclude']:
         return False
     if entry['app'] in selection['include']:
