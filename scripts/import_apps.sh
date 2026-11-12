@@ -11,8 +11,14 @@
 #
 # Uso:
 #   ./import_apps.sh --preview                    (default)
+#   ./import_apps.sh --preview --check-releases   (consulta la API de GitHub)
 #   ./import_apps.sh --apply
 #   ./import_apps.sh --apply --machine=escritorio
+#
+# --check-releases: verifica contra la API pública de GitHub (sin token,
+# 60 consultas/hora por IP) que el asset declarado de cada binario existe
+# y tiene digest SHA256 oficial. Una consulta por binario con 'asset'.
+# Sin este flag, el script no consulta la API de GitHub.
 
 set -euo pipefail
 
@@ -20,12 +26,14 @@ DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 MANIFEST="$DOTFILES_DIR/apps/manifest.yaml"
 MODE="preview"
 MACHINE_OVERRIDE=""
+CHECK_RELEASES="0"
 
 for arg in "$@"; do
   case "$arg" in
     --preview) MODE="preview" ;;
     --apply) MODE="apply" ;;
     --machine=*) MACHINE_OVERRIDE="${arg#*=}" ;;
+    --check-releases) CHECK_RELEASES="1" ;;
     *) echo "Argumento desconocido: $arg" >&2; exit 1 ;;
   esac
 done
@@ -554,7 +562,7 @@ def classify(apps, machine_type, flatpak_set, snap_set, apt_status, binary_statu
 
 
 def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope,
-                   scope_warning_suffix):
+                   scope_warning_suffix, check_releases):
     print("--- Candidatas automáticas (se instalarían con --apply) ---")
     if not candidatas:
         print("  (ninguna)")
@@ -581,6 +589,7 @@ def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fu
     print("--- Declaradas como manual (acción humana pendiente) ---")
     if not manuales:
         print("  (ninguna)")
+    omitidos_release = 0
     for a in manuales:
         src = a.get('source') or {}
         estado = "instalado" if src.get('_installed') else "falta"
@@ -588,7 +597,9 @@ def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fu
         origin = src.get('origin') or src.get('repo_url') or 'pendiente'
         dest = src.get('destination', '-')
         release_check = ''
-        if a['manager'] == 'binary' and a.get('asset'):
+        if a['manager'] == 'binary' and a.get('asset') and not check_releases:
+            omitidos_release += 1
+        elif a['manager'] == 'binary' and a.get('asset'):
             result = verify_release_asset(a)
             if result['ok']:
                 release_check = f"  [RELEASE_CHECK: OK -- {result['detail']}]"
@@ -596,6 +607,9 @@ def print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fu
                 release_check = f"  [RELEASE_CHECK: ERROR -- {result['detail']}]"
         print(f"  [MANUAL][{estado}] {a['display_name']:<18} {a['manager']:<8} "
               f"v={version} origen={origin} destino={dest}{scope_warning_suffix(a)}{release_check}")
+    if omitidos_release:
+        print(f"  (RELEASE_CHECK omitido para {omitidos_release} binario(s): "
+              f"usa --check-releases para verificarlos contra GitHub)")
     print()
 
     print("--- Ignoradas (broken / no preferidas, nunca candidatas) ---")
@@ -662,7 +676,8 @@ def verify_one(entry, flatpak_set_cmd, snap_set_cmd):
 def main():
     (manifest_path, machine_type, mode, flatpak_file, snap_file,
      apt_status_file, binary_status_file, prereqs_file,
-     flatpak_user_file, flatpak_system_file) = sys.argv[1:11]
+     flatpak_user_file, flatpak_system_file, check_releases_arg) = sys.argv[1:12]
+    check_releases = (check_releases_arg == '1')
 
     data = yaml.safe_load(open(manifest_path))
     apps = data['apps']
@@ -730,7 +745,7 @@ def main():
     candidatas = candidatas_ok
 
     print_preview(candidatas, ya_instaladas, skip_equiv, manuales, ignoradas, fuera_scope,
-                  scope_warning_suffix)
+                  scope_warning_suffix, check_releases)
 
     if mode == "preview":
         print("\n(Modo preview: no se instaló nada.)")
@@ -771,7 +786,8 @@ python3 "$TMPDIR/engine.py" \
   "$MANIFEST" "$MACHINE_TYPE" "$MODE" \
   "$TMPDIR/flatpak_installed.txt" "$TMPDIR/snap_installed.txt" \
   "$TMPDIR/apt_status.txt" "$TMPDIR/binary_status.txt" "$TMPDIR/prereqs.txt" \
-  "$TMPDIR/flatpak_installed_user.txt" "$TMPDIR/flatpak_installed_system.txt"
+  "$TMPDIR/flatpak_installed_user.txt" "$TMPDIR/flatpak_installed_system.txt" \
+  "$CHECK_RELEASES"
 ENGINE_EXIT=$?
 
 echo
