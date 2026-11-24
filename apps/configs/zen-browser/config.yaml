@@ -1,0 +1,133 @@
+# ~/dotfiles/apps/configs/zen-browser/config.yaml
+#
+# Perfil de configuración de Zen Browser (CF1). Ver docs/CONFIGS.md.
+#
+#   PC origen:  scripts/capture_config.sh zen-browser --apply   -> files/  -> commit + push
+#   PC destino: dotpull -> scripts/restore_config.sh zen-browser --apply
+#
+# Aquí solo va CONFIGURACIÓN: mods, CSS, atajos, contenedores y preferencias.
+# El ESTADO (marcadores, contraseñas, historial, extensiones, Espacios y
+# pestañas) viaja con la cuenta Mozilla, y los secretos nunca entran en el repo.
+
+id: zen-browser
+app: app.zen_browser.zen
+description: "Mods, CSS, atajos, contenedores y preferencias de Zen Browser"
+
+location:
+  # Flatpak. La ruta cambia entre versiones de Zen (migración a XDG), por eso
+  # hay varias candidatas; se usa la primera que tenga profiles.ini.
+  base:
+    - "~/.var/app/app.zen_browser.zen/.zen"
+    - "~/.var/app/app.zen_browser.zen/config/zen"
+  # El perfil activo se lee de installs.ini y, si no, de profiles.ini.
+  resolver: mozilla-profile
+
+running_check:
+  flatpak: app.zen_browser.zen
+
+items:
+  - path: chrome/                  # userChrome.css, userContent.css, logo y mods (zen-themes/)
+    strategy: copy
+  - path: zen-themes.json          # lista de mods instalados y activos
+    strategy: copy
+  - path: user.js                  # preferencias fijas propias
+    strategy: copy
+  - path: customKeys.json          # atajos de teclado personalizados
+    strategy: copy
+  - path: containers.json          # contenedores (nombres, colores, iconos)
+    strategy: copy
+  - path: handlers.json            # acciones por tipo de archivo y protocolo
+    strategy: copy
+  - path: prefs.js                 # preferencias, filtradas; se fusionan en destino
+    strategy: prefs-merge
+    exclude_prefixes:
+      # cuenta, sincronización y servicios remotos
+      - "services.sync."
+      - "services.settings."
+      - "identity.fxaccounts."
+      - "dom.push."
+      # estado interno de extensiones (UUID propios de cada PC)
+      - "extensions.webextensions."
+      - "extensions.databaseSchema"
+      - "extensions.signatureCheckpoint"
+      - "extensions.pendingOperations"
+      - "extensions.blocklist."
+      - "extensions.quarantinedDomains"
+      - "extensions.colorway-builtin-themes-cleanup"
+      # actualizaciones, telemetría y experimentos
+      - "app.update."
+      - "app.normandy."
+      - "toolkit.telemetry."
+      - "datareporting."
+      - "nimbus."
+      - "messaging-system."
+      - "browser.engagement."
+      - "captchadetection."
+      - "doh-rollout."
+      - "zen.updates."
+      # arranque, perfiles y migraciones internas
+      - "toolkit.startup."
+      - "toolkit.profiles."
+      - "browser.profiles."
+      - "browser.laterrun."
+      - "browser.migration."
+      - "browser.backup."
+      - "browser.sessionstore."
+      - "zen.ui.migration."
+      - "zen.session-store."
+      - "distribution."
+      # caché y mantenimiento propios de cada PC
+      - "media.gmp"
+      - "gfx."
+      - "idle."
+      - "storage.vacuum."
+      - "places.database."
+      - "browser.region."
+      - "browser.rights."
+      - "browser.termsofuse."
+      - "pdfjs.enabledCache"
+      - "pdfjs.migrationVersion"
+      - "pdfjs.featuresNotificationImpressionCount"
+      - "print."
+      - "sidebar.backupState"
+    exclude_keys:
+      - "browser.download.lastDir"
+      - "devtools.aboutdebugging.tmpExtDirPath"
+      - "devtools.everOpened"
+      - "layout.css.devPixelsPerPx"
+      - "zen.workspaces.active"
+      - "zen.library.last-tab"
+      - "zen.urlbar.suggestions-learner"
+      - "zen.mods.last-update"
+      - "zen.mods.milestone"
+      - "zen.mods.updated-value-observer"
+    exclude_patterns:
+      # marcas de tiempo e identificadores, se llamen como se llamen
+      - "(?i)(lastupdate|last_update|lastcheck|last_check|lastcoldstartup|timestamp|impression|installdate|uuid|userAgentID|profileId|clientid)"
+
+# Nunca forman parte de este perfil (estado, sesiones o secretos).
+never:
+  - logins.json
+  - logins-backup.json
+  - logins.db
+  - key4.db
+  - cert9.db
+  - signedInUser.json
+  - cookies.sqlite
+  - places.sqlite
+  - favicons.sqlite
+  - formhistory.sqlite
+  - permissions.sqlite
+  - storage/
+  - sessionstore-backups/
+  - zen-sessions.jsonlz4
+  - zen-sessions-backup/
+  - extensions/
+  - weave/
+  - xulstore.json
+  - search.json.mozlz4
+
+handled_elsewhere:
+  - "marcadores, contraseñas, historial, extensiones, Espacios y pestañas: cuenta Mozilla (Ajustes > Sync)"
+  - "wallpaper/: fuera de Git por tamaño (imágenes)"
+  - "datos internos de Bitwarden, Stylus y Violentmonkey: la sincronización de cada extensión"

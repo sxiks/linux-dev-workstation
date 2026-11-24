@@ -16,6 +16,7 @@ Este repositorio permite mantener sincronizados dos o más equipos Linux mediant
 | Sincronizar cambios de Kitty, Zellij o Yazi | PC origen / destino | `dotpush` / `dotpull` |
 | Pasar configuración GNOME | Torre → Laptop | `./export_gnome.sh` / `./import_gnome.sh` |
 | Sincronizar aplicaciones instaladas | Torre → Laptop | `./export_apps.sh && dotpush` / `dotpull && ./import_apps.sh` |
+| Llevar la configuración de una app (ej. Zen) | PC origen / destino | `capture_config.sh <perfil> --apply` + commit / `dotpull && restore_config.sh <perfil> --apply` (ver `docs/CONFIGS.md`) |
 | Actualizar sistema | Cualquier PC | `update-system` |
 | Sincronizar proyectos | Todas | Automático mediante Syncthing |
 
