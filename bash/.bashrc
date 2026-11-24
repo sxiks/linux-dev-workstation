@@ -3,7 +3,7 @@
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
-      *) return;;
+      *) return 0;;
 esac
 
 HISTCONTROL=ignoreboth
