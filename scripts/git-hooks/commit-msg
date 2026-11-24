@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# commit-msg — rechaza mensajes de commit con atribuciones a asistentes de IA.
+#
+# Regla del repositorio (docs/COMMITS.md): ningún commit lleva coautorías
+# de Claude, frases de "generado/asistido con Claude", enlaces o
+# identificadores de sesiones, ni firmas equivalentes.
+#
+# Activación (una vez por clon, en cada PC):
+#   git config core.hooksPath scripts/git-hooks
+#
+# Las menciones normales a Claude (por ejemplo, documentar la configuración
+# de Claude Code) no se bloquean: solo los patrones de atribución.
+
+set -uo pipefail
+
+msg_file="${1:?commit-msg: falta la ruta del mensaje}"
+
+# Git elimina las líneas de comentario al guardar el mensaje; no se revisan.
+comment_char="$(git config --get core.commentChar 2>/dev/null || true)"
+[ -z "$comment_char" ] || [ "$comment_char" = "auto" ] && comment_char="#"
+
+content="$(grep -v "^${comment_char}" "$msg_file" 2>/dev/null || true)"
+
+patterns='co-authored-by:.*(claude|anthropic)'
+patterns+='|claude-session:'
+patterns+='|claude\.ai/(code|chat|share)'
+patterns+='|noreply@anthropic\.com'
+patterns+='|(generated|created|made|implemented|assisted|written|built|developed)[[:space:]]+(by|with)[[:space:]]+(the[[:space:]]+help[[:space:]]+of[[:space:]]+)?\[?claude'
+patterns+='|(hecho|desarrollado|generado|creado|implementado|escrito|asistido)[[:space:]]+(con|por|mediante)[[:space:]]+(ayuda[[:space:]]+de[[:space:]]+)?\[?claude'
+patterns+='|🤖'
+
+if hits="$(printf '%s\n' "$content" | grep -inE -- "$patterns")"; then
+    {
+        echo "ERROR (commit-msg): el mensaje contiene atribuciones prohibidas:"
+        printf '%s\n' "$hits" | sed 's/^/  línea /'
+        echo "Quita esas líneas y vuelve a hacer el commit. Regla: docs/COMMITS.md"
+        echo "No se creó el commit."
+    } >&2
+    exit 1
+fi
+
+exit 0

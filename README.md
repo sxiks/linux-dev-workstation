@@ -127,6 +127,9 @@ dotpush
 
 antes de cambiar de equipo.
 
+Los mensajes de commit siguen `docs/COMMITS.md`: sin atribuciones a
+asistentes de IA, protegido por el hook `scripts/git-hooks/commit-msg`.
+
 ---
 
 ## Aplicaciones
