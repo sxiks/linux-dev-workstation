@@ -63,7 +63,6 @@ items:
       - "messaging-system."
       - "browser.engagement."
       - "captchadetection."
-      - "doh-rollout."
       - "zen.updates."
       # arranque, perfiles y migraciones internas
       - "toolkit.startup."
@@ -94,6 +93,8 @@ items:
       - "browser.download.lastDir"
       - "devtools.aboutdebugging.tmpExtDirPath"
       - "devtools.everOpened"
+      - "doh-rollout.doneFirstRun"
+      - "doh-rollout.home-region"
       - "layout.css.devPixelsPerPx"
       - "zen.workspaces.active"
       - "zen.library.last-tab"
